@@ -2,15 +2,15 @@
 
 ## Introduction
 
-LSODA.jl is a Julia package that interfaces to the [liblsoda](https://github.com/sdwfrost/liblsoda) library thereby providing a way to use the LSODA algorithm from Linda Petzold and Alan Hindmarsh in [Julia](http://julialang.org/). [Clang.jl] has been used to write the library.
+**LSODA.jl** is a Julia package that interfaces to the [liblsoda](https://github.com/sdwfrost/liblsoda) library, developped by [Simon Frost](http://www.vet.cam.ac.uk/directory/sdf22@cam.ac.uk) ([@sdwfrost](http://github.com/sdwfrost)), thereby providing a way to use the LSODA algorithm from Linda Petzold and Alan Hindmarsh in [Julia](http://julialang.org/). **Clang.jl** has been used to write the library.
 
 ## Installation
 
-To install this package, run the command `Pkg.clone("")`
+To install this package, run the command `Pkg.clone("https://github.com/rveltz/LSODA.jl.git")`
 
 ## Simplified Functions
 
-~~~~
+```julia
 function rhs!(t, x, ydot, data)
 	ydot[1]=1.0E4 * x[2] * x[3] - .04E0 * x[1]
 	ydot[3]=3.0E7 * x[2] * x[2]
@@ -21,7 +21,7 @@ end
 y0 = [1.,0.,0.]
 tspan = [0., 0.4]
 @time lsoda_0(rhs!, y0, tspan, reltol= 1e-4,abstol = Vector([1.e-6,1.e-10,1.e-6]))
-~~~~
+```
 
 This should give the following.
 
