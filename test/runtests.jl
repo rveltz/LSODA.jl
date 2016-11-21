@@ -2,4 +2,5 @@ using LSODA
 using Base.Test
 
 # write your own tests here
-@test 1 == 2
+include("test1.jl")
+include("test2.jl")
