@@ -83,13 +83,13 @@ end
 # UserFunctionAndData(func::Function, data::Void, neq::Cint) = func
 
 function lsoda_prepare(ctx::lsoda_context_t,opt::lsoda_opt_t)
-  return ccall((:lsoda_prepare,"liblsoda.dylib"),Cint,
+  return ccall((:lsoda_prepare,liblsoda),Cint,
     (Ptr{lsoda_context_t},Ptr{lsoda_opt_t}),
     Ref(ctx),Ref(opt))
 end
 
 function lsoda(ctx::lsoda_context_t,y::Vector,t::Vector{Float64},tout)
-  return ccall((:lsoda,"liblsoda.dylib"),Cint,
+  return ccall((:lsoda,liblsoda),Cint,
     (Ptr{lsoda_context_t},Ptr{Cdouble},Ptr{Cdouble},Cdouble),
     Ref(ctx),y,t,tout[1])
 end
@@ -98,6 +98,6 @@ end
 # written to wrap lsoda_free from C library but never used in practise as
 # lsoda_context_t variables are handled on Julia's side
 function lsoda_free(ctx::lsoda_context_t)
-    ccall((:lsoda_free,"liblsoda.dylib"),Void,(Ptr{lsoda_context_t},),Ref(ctx))
+    ccall((:lsoda_free,liblsoda),Void,(Ptr{lsoda_context_t},),Ref(ctx))
     nothing
 end

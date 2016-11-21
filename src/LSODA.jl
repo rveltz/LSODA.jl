@@ -9,7 +9,7 @@ else
     error("LSODA is not properly installed. Please run Pkg.build(\"LSODA\")")
 end
 
-export lsoda
+export lsoda, lsoda_0
 
 include("types_and_consts.jl")
 include("solver.jl")
