@@ -11,3 +11,7 @@ y0 = [1.,0.,0.]
 tspan = [0., 0.4]
 @time lsoda_0(rhs!, y0, tspan, reltol= 1e-4,abstol = Vector([1.e-6,1.e-10,1.e-6]))
 @time lsoda_0(rhs!, y0, tspan, reltol= 1e-4,abstol = Vector([1.e-6,1.e-10,1.e-6]))
+
+tspan = [4.*10.0^k for k=-1:10]
+_, res = lsoda(rhs!, y0, tspan, reltol= 1e-4,abstol = Vector([1.e-6,1.e-10,1.e-6]))
+println(res)
