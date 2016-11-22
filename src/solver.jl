@@ -115,12 +115,14 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
   return ctx, yres
 end
 
-function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64})
+function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data::Any=nothing)
+	if data != nothing
+		ctx.data.userdata=data
+	end
 	t    = Array{Float64}(1)
 	tout = Array{Float64}(1)
 	t[1] = tspan[1]
 	tout[1] = tspan[2]
 	lsoda(ctx,y,t,tout[1])
-	return y
 end
 	
