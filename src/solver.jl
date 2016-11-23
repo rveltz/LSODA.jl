@@ -7,14 +7,7 @@ end
 
 const fex_c = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData}))
 
-# function lsodafun{T1,T2,T3}(t::T1,y::T2,yp::T3, userfun::Function)
-#     y_ = pointer_to_array(y,3)
-#     ydot_ = pointer_to_array(yp,3)
-#     userfun(t, y_, ydot_)
-#     return Int32(0)
-# end
-
-function lsoda_(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
+function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
   neq = Int32(length(y0))
   userfun = UserFunctionAndData(f, userdata,neq)
   
