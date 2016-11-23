@@ -14,7 +14,7 @@ const fex_c = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{Use
 #     return Int32(0)
 # end
 
-function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
+function lsoda_(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
   neq = Int32(length(y0))
   userfun = UserFunctionAndData(f, userdata,neq)
   
@@ -115,9 +115,9 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
   return ctx, yres
 end
 
-function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data::Any=nothing)
+function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data=nothing)
 	if data != nothing
-		ctx.data.userdata=data
+		ctx.data.userdata = data
 	end
 	t    = Array{Float64}(1)
 	tout = Array{Float64}(1)
