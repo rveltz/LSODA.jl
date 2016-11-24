@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/rveltz/LSODA.jl.svg?branch=master)](https://travis-ci.org/rveltz/LSODA)
-[![Coverage Status](https://coveralls.io/github/rveltz/LSODA.jl/badge.svg?branch=master)](https://coveralls.io/github/rveltz/LSODA.jl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/rveltz/LSODA.jl/badge.svg?branch=master)](https://coveralls.io/github/rveltz/LSODA.jl?branch=master)
 [![Build status](https://ci.appveyor.com/project/rveltz/lsoda-jl?svg=true&branch=master)](https://ci.appveyor.com/project/rveltz/lsoda-jl/branch/master)
 
 
