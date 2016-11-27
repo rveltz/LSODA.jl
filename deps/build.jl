@@ -12,6 +12,11 @@ libdir=joinpath(lsodadir,"usr","lib")
 srcdir = joinpath(lsodadir,"src","liblsoda-master")
 builddir = joinpath(srcdir,"src")
 
+provides(Binaries,
+    URI("https://dl.bintray.com/sdwfrost/generic/liblsoda.7z"),
+    [liblsoda], unpacked_dir="bin$(Sys.WORD_SIZE)",
+    os = :Windows)
+
 if Sys.KERNEL == :Darwin
     suffix="dylib"
 elseif Sys.KERNEL == :NT
@@ -30,5 +35,5 @@ BinDeps.provides(SimpleBuild,
             BinDeps.MakeTargets()
         `cp $builddir/liblsoda.$suffix $libdir`
         end
-end), liblsoda)
+end), [liblsoda], os = :Unix)
 @BinDeps.install Dict(:liblsoda => :liblsoda)
