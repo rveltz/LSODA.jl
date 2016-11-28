@@ -1,6 +1,7 @@
 module LSODA
 
-using Compat
+using Compat, DiffEqBase
+import DiffEqBase: solve
 
 const depsfile = joinpath(dirname(dirname(@__FILE__)),"deps","deps.jl")
 if isfile(depsfile)
@@ -11,7 +12,10 @@ end
 
 export lsoda, lsoda_0, lsoda_opt_t, lsoda_context_t, lsoda_prepare, lsoda_opt_t, lsoda_free, lsoda_evolve!
 
+export LSODAAlgorithm, LSODAAlg, solve
+
 include("types_and_consts.jl")
 include("solver.jl")
+include("common.jl")
 
 end # module
