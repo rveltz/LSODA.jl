@@ -2,7 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/rveltz/LSODA.jl/badge.svg?branch=master)](https://coveralls.io/github/rveltz/LSODA.jl?branch=master)
 [![Build status](https://ci.appveyor.com/api/projects/status/p879qachs4c52y4u/branch/master?svg=true)](https://ci.appveyor.com/project/rveltz/lsoda-jl/branch/master)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://rveltz.github.io/LSODA.jl/stable)
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://rveltz.github.io/LSODA.jl/latest)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://rveltz.github.io/LSODA.jl/latest)
 
 
 # LSODA.jl
