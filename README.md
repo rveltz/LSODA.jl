@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/rveltz/LSODA.jl.svg?branch=master)](https://travis-ci.org/rveltz/LSODA)
 [![Coverage Status](https://coveralls.io/repos/github/rveltz/LSODA.jl/badge.svg?branch=master)](https://coveralls.io/github/rveltz/LSODA.jl?branch=master)
 [![Build status](https://ci.appveyor.com/api/projects/status/p879qachs4c52y4u/branch/master?svg=true)](https://ci.appveyor.com/project/rveltz/lsoda-jl/branch/master)
-
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sdwfrost.github.io/Gillespie.jl/stable)
 
 
 
@@ -9,7 +9,7 @@
 
 ## Introduction
 
-**LSODA.jl** is a Julia package that interfaces to the [liblsoda](https://github.com/sdwfrost/liblsoda) library, developped by [Simon Frost](http://www.vet.cam.ac.uk/directory/sdf22@cam.ac.uk) ([@sdwfrost](http://github.com/sdwfrost)), thereby providing a way to use the LSODA algorithm from Linda Petzold and Alan Hindmarsh from [Julia](http://julialang.org/). **[Clang.jl](https://github.com/ihnorton/Clang.jl)** has been used to write the library and **[Sundials.jl](https://github.com/JuliaDiffEq/Sundials.jl)** was a inspiring source.
+**LSODA.jl** is a Julia package that interfaces to the [liblsoda](https://github.com/sdwfrost/liblsoda) library, developed by [Simon Frost](http://www.vet.cam.ac.uk/directory/sdf22@cam.ac.uk) ([@sdwfrost](http://github.com/sdwfrost)), thereby providing a way to use the LSODA algorithm from Linda Petzold and Alan Hindmarsh from [Julia](http://julialang.org/). **[Clang.jl](https://github.com/ihnorton/Clang.jl)** has been used to write the library and **[Sundials.jl](https://github.com/JuliaDiffEq/Sundials.jl)** was a inspiring source.
 
 ## Installation
 

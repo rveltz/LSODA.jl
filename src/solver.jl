@@ -10,7 +10,7 @@ const fex_c = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{Use
 function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
   neq = Int32(length(y0))
   userfun = UserFunctionAndData(f, userdata,neq)
-  
+
   atol = ones(Float64,neq)
   rtol = ones(Float64,neq)
 
@@ -56,6 +56,11 @@ function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userd
   return ctx
 end
 
+"""
+  lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
+
+Solves a set of ordinary differential equations using the LSODA algorithm.
+"""
 function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
   neq = Int32(length(y0))
   userfun = UserFunctionAndData(f, userdata,neq)
@@ -99,9 +104,9 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
 
   lsoda_prepare(ctx,opt)
   yres[1,:] = y0
-  
+
   for k in 2:length(tspan)
-	tout[1] = tspan[k]  
+	tout[1] = tspan[k]
     lsoda(ctx,y,t,tout[1])
 	yres[k,:] = copy(y)
   end
@@ -118,4 +123,3 @@ function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Flo
 	tout[1] = tspan[2]
 	lsoda(ctx,y,t,tout[1])
 end
-	
