@@ -2,16 +2,11 @@ using Documenter, LSODA
 
 makedocs(
     modules=[LSODA],
-    clean = false,
-    format = :html,
-    sitename = "LSODA.jl",
-    pages = Any[
-      "Home" => "index.md"
-    ]
+    doctest = false
 )
 
 deploydocs(
+    deps = Deps.pip("mkdocs","python-markdown-math"),
     repo   = "github.com/rveltz/LSODA.jl.git",
-    target = "build",
     julia  = "release"
 )
