@@ -13,7 +13,5 @@ makedocs(
 deploydocs(
     repo   = "github.com/rveltz/LSODA.jl.git",
     target = "build",
-    deps   = nothing,
-    make   = nothing,
     julia  = "release"
 )
