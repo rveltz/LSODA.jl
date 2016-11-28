@@ -1,13 +1,12 @@
-push!(LOAD_PATH,"../src")
-
 using Documenter, LSODA
 
 makedocs(
     modules=[LSODA],
+    clean = false,
     format = :html,
-    sitename = "LSODA",
-    pages = [
-      "index.md"
+    sitename = "LSODA.jl",
+    pages = Any[
+      "Home" => "index.md"
     ]
 )
 
