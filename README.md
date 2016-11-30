@@ -7,7 +7,7 @@
 
 # LSODA.jl
 
-## Introduction
+## Introduction 
 
 **LSODA.jl** is a Julia package that interfaces to the [liblsoda](https://github.com/sdwfrost/liblsoda) library, developed by [Simon Frost](http://www.vet.cam.ac.uk/directory/sdf22@cam.ac.uk) ([@sdwfrost](http://github.com/sdwfrost)), thereby providing a way to use the LSODA algorithm from Linda Petzold and Alan Hindmarsh from [Julia](http://julialang.org/). **[Clang.jl](https://github.com/ihnorton/Clang.jl)** has been used to write the library and **[Sundials.jl](https://github.com/JuliaDiffEq/Sundials.jl)** was a inspiring source.
 
