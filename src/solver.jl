@@ -50,6 +50,7 @@ function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userd
   lsoda_prepare(ctx,opt)
   for i=1:12
     lsoda(ctx,y,t,tout[1])
+	@assert (ctx.state >0) string("LSODA error istate = ", ctx.state)
     @printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",t[1],y[1], y[2], y[3])
     tout[1] *= 10.0E0
   end
@@ -85,7 +86,7 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
   t    = Array{Float64}(1)
   tout = Array{Float64}(1)
   y    = Array{Float64}(neq)
-  y = copy(y0)
+  y    = copy(y0)
 
   t[1]    = tspan[1]
   tout[1] = tspan[2]
@@ -108,6 +109,7 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
   for k in 2:length(tspan)
 	tout[1] = tspan[k]
     lsoda(ctx,y,t,tout[1])
+	@assert (ctx.state >0) string("LSODA error istate = ", ctx.state)
 	yres[k,:] = copy(y)
   end
   return ctx, yres
@@ -127,4 +129,5 @@ function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Flo
 	t[1] = tspan[1]
 	tout[1] = tspan[2]
 	lsoda(ctx,y,t,tout[1])
+	@assert (ctx.state >0) string("LSODA error istate = ", ctx.state)
 end
