@@ -3,13 +3,13 @@ using BinDeps
 @BinDeps.setup
 
 liblsoda = library_dependency("liblsoda")
-BinDeps.provides(Sources,URI("https://github.com/sdwfrost/liblsoda/archive/master.tar.gz"),liblsoda,unpacked_dir="liblsoda-master")
+BinDeps.provides(Sources,URI("https://github.com/sdwfrost/liblsoda/archive/v0.1.0.tar.gz"),liblsoda,unpacked_dir="liblsoda-0.1.0")
 
 lsodadir = BinDeps.depsdir(liblsoda)
 
 libdir=joinpath(lsodadir,"usr","lib")
 
-srcdir = joinpath(lsodadir,"src","liblsoda-master")
+srcdir = joinpath(lsodadir,"src","liblsoda-0.1.0")
 builddir = joinpath(srcdir,"src")
 
 provides(Binaries,
