@@ -169,12 +169,12 @@ at t =   4.0000e+10 y=   1.423392e-08   5.693574e-14   1.000000e+00</code></pre>
 <strong><code>LSODA.lsoda</code></strong> &mdash; <em>Function</em>.</p>
 <p>lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)</p>
 <p>Solves a set of ordinary differential equations using the LSODA algorithm. The vector field encoded in an inplace f::Function needs to have the self-explanatory arguments f(t, y, ydot, data)</p>
-<p><a target='_blank' href='https://github.com/rveltz/LSODA.jl/tree/1511597d60f61390334a7d59da7defd588103540/src/solver.jl#L60-L64' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/rveltz/LSODA.jl/tree/0ff03d57ba77f52410c0eef92adfcb1f48aa28ac/src/solver.jl#L60-L64' class='documenter-source'>source</a><br></p>
 <p><a id='LSODA.lsoda_evolve!' href='#LSODA.lsoda_evolve!'>#</a>
 <strong><code>LSODA.lsoda_evolve!</code></strong> &mdash; <em>Function</em>.</p>
 <p>lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data=nothing)</p>
 <p>Solves a set of ordinary differential equations using the LSODA algorithm and the context variable ctx. This avoid re-allocating ctx.</p>
-<p><a target='_blank' href='https://github.com/rveltz/LSODA.jl/tree/1511597d60f61390334a7d59da7defd588103540/src/solver.jl#L118-L122' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/rveltz/LSODA.jl/tree/0ff03d57ba77f52410c0eef92adfcb1f48aa28ac/src/solver.jl#L118-L122' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
@@ -216,5 +216,5 @@ at t =   4.0000e+10 y=   1.423392e-08   5.693574e-14   1.000000e+00</code></pre>
 
 <!--
 MkDocs version : 0.16.0
-Build Date UTC : 2016-12-09 07:21:05
+Build Date UTC : 2016-12-11 06:29:33
 -->
