@@ -13,7 +13,8 @@
 
 ## Installation
 
-To install this package, run the command `Pkg.clone("https://github.com/rveltz/LSODA.jl.git")`
+To install this package, run the command `Pkg.clone("https://github.com/rveltz/LSODA.jl.git")`. Then you must build the package with
+`Pkg.build("LSODA")`.
 
 ## Simplified Functions
 
