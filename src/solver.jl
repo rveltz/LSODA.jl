@@ -118,12 +118,14 @@ end
 """
   lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data=nothing)
 
-Solves a set of ordinary differential equations using the LSODA algorithm and the context variable ctx. This avoid re-allocating ctx.
+Solves a set of ordinary differential equations using the LSODA algorithm and the context variable ctx. This avoid re-allocating ctx. You have to be carefull to remember the current time of this function will return an error.
+
 """
 function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data=nothing)
 	if data != nothing
 		ctx.data.userdata = data
 	end
+	@assert ctx.neq == length(y)
 	t    = Array{Float64}(1)
 	tout = Array{Float64}(1)
 	t[1] = tspan[1]
