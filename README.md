@@ -55,3 +55,29 @@ at t =   4.0000e+08 y=   5.283524e-06   2.113420e-11   9.999947e-01
 at t =   4.0000e+09 y=   4.658945e-07   1.863579e-12   9.999995e-01
 at t =   4.0000e+10 y=   1.423392e-08   5.693574e-14   1.000000e+00
 ```
+
+## JuliaDiffEq Common Interface
+
+The functionality of LSODA.jl can be accessed through the JuliaDiffEq common interface. To do this, you build a problem object for like:
+
+```
+using DiffEqBase
+function rhs!(t, x, ydot, data)
+    ydot[1]=1.0E4 * x[2] * x[3] - .04E0 * x[1]
+    ydot[3]=3.0E7 * x[2] * x[2]
+    ydot[2]=-ydot[1] - ydot[3]
+  nothing
+end
+
+y0 = [1.,0.,0.]
+tspan = (0., 0.4)
+prob = ODEProblem(rhs!,y0,tspan)
+```
+
+This problem is solved by LSODA by using the LSODAAlg() algorithm in the common `solve` command as follows:
+
+```
+sol = solve(prob,LSODAAlg())
+```
+
+Many keyword arguments can be used to control the solver, its tolerances, and its output formats. For more information, please see the [DifferentialEquations.jl documentation](https://juliadiffeq.github.io/DiffEqDocs.jl/latest/).
