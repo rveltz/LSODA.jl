@@ -1,6 +1,3 @@
-abstract LSODAAlgorithm <: AbstractODEAlgorithm
-immutable LSODAAlg <: LSODAAlgorithm end
-
 ## Common Interface Solve Functions
 
 function solve{uType,tType,isinplace,F}(
