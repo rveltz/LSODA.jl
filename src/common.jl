@@ -8,6 +8,7 @@ function solve{uType,tType,isinplace,F}(
     alg::LSODAAlgorithm,
     timeseries=[],ts=[],ks=[];
     abstol=1/10^6,reltol=1/10^3,
+    tstops=Float64[],
     saveat=Float64[],maxiter=Int(1e5),
     timeseries_errors=true,save_timeseries=true,
     userdata=nothing,kwargs...)
@@ -23,6 +24,10 @@ function solve{uType,tType,isinplace,F}(
     end
     if t0 > save_ts[1]
         error("First saving timepoint is before the solving timespan")
+    end
+
+    if !isempty(tstops)
+        error("tstops is not supported for this solver. Please use saveat instead")
     end
 
     if typeof(prob.u0) <: Number
@@ -48,8 +53,10 @@ function solve{uType,tType,isinplace,F}(
     ures = Vector{Vector{Float64}}()
     push!(ures,u0)
     utmp = copy(u0)
+    utmp2= copy(u0)
     ttmp = [t0]
     t    = [t0]
+    t2   = [t0]
     ts   = [t0]
 
     neq = Int32(length(u0))
@@ -74,7 +81,12 @@ function solve{uType,tType,isinplace,F}(
     opt.ixpr = 0
     opt.rtol = pointer(rtol)
     opt.atol = pointer(atol)
-    opt.itask = 1
+    if save_timeseries
+      itask_tmp = 2
+    else
+      itask_tmp = 1
+    end
+    opt.itask = itask_tmp
 
     const fex_c = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{typeof(userfun)}))
 
@@ -86,38 +98,27 @@ function solve{uType,tType,isinplace,F}(
 
     lsoda_prepare(ctx,opt)
 
-    # The Inner Loops : Style depends on save_timeseries
-    if save_timeseries
-        #=
-        for k in 2:length(save_ts)
-            looped = false
-            while tout[end] < save_ts[k]
-                looped = true
-                flag = @checkflag CVode(mem,
-                                save_ts[k], utmp, tout, CV_ONE_STEP)
-                push!(ures,copy(utmp))
-                push!(ts, tout...)
-            end
-            if looped
-                # Fix the end
-                flag = @checkflag CVodeGetDky(
-                                        mem, save_ts[k], Cint(0), ures[end])
-                ts[end] = save_ts[k]
-            else # Just push another value
-                flag = @checkflag CVodeGetDky(
-                                        mem, save_ts[k], Cint(0), utmp)
-                push!(ures,copy(utmp))
-                push!(ts, save_ts[k]...)
-            end
-        end
-        =#
-    else # save_timeseries == false, so use saveat style
-      for k in 2:length(save_ts)
-        ttmp[1] = save_ts[k]
+    for k in 2:length(save_ts)
+      ttmp[1] = save_ts[k]
+      while t[1]<ttmp[1]
         lsoda(ctx,utmp,t,ttmp[1])
-        push!(ures,copy(utmp))
+        if t[1]>ttmp[1] # overstepd, interpolate back
+          t2[1] = t[1] # save step values
+          copy!(utmp2,utmp) # save step values
+          opt.itask = 1 # change to interpolating
+          lsoda(ctx,utmp,t,ttmp[1])
+          opt.itask = itask_tmp
+          push!(ures,copy(utmp))
+          push!(ts,t[1])
+          if k != length(save_ts) # don't overstep the last timestep
+            push!(ures,copy(utmp2))
+            push!(ts,t2[1])
+          end
+        else
+          push!(ures,copy(utmp))
+          push!(ts,t[1])
+        end
       end
-      ts = save_ts
     end
 
     ### Finishing Routine
