@@ -7,7 +7,7 @@
 
 # LSODA.jl
 
-## Introduction 
+## Introduction
 
 **LSODA.jl** is a Julia package that interfaces to the [liblsoda](https://github.com/sdwfrost/liblsoda) library, developed by [Simon Frost](http://www.vet.cam.ac.uk/directory/sdf22@cam.ac.uk) ([@sdwfrost](http://github.com/sdwfrost)), thereby providing a way to use the LSODA algorithm from Linda Petzold and Alan Hindmarsh from [Julia](http://julialang.org/). **[Clang.jl](https://github.com/ihnorton/Clang.jl)** has been used to write the library and **[Sundials.jl](https://github.com/JuliaDiffEq/Sundials.jl)** was a inspiring source.
 
@@ -75,10 +75,10 @@ tspan = (0., 0.4)
 prob = ODEProblem(rhs!,y0,tspan)
 ```
 
-This problem is solved by LSODA by using the LSODAAlg() algorithm in the common `solve` command as follows:
+This problem is solved by LSODA by using the lsoda() algorithm in the common `solve` command as follows:
 
 ```
-sol = solve(prob,LSODAAlg())
+sol = solve(prob,lsoda())
 ```
 
 Many keyword arguments can be used to control the solver, its tolerances, and its output formats. For more information, please see the [DifferentialEquations.jl documentation](https://juliadiffeq.github.io/DiffEqDocs.jl/latest/).
