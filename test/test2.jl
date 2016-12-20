@@ -29,14 +29,3 @@ ctx, _ = LSODA.lsoda(rhs!, y0, tspan[1:2], reltol= 1e-4,abstol = Vector([1.e-6,1
 	LSODA.lsoda_evolve!(ctx,y0,tspan[k-1:k])
 	@printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",tspan[k],y0[1], y0[2], y0[3])
 end
-
-#case with parameters
-println("\n####################################\n--> Use of a lsoda_evolve!")
-function rhs!(t, x, ydot, data::Float64)
-	ydot[1]= data * x[1]
-  nothing
-end
-y0 = [1.]
-tspan = [0., 1.0]
-ctx,  _ = @time LSODA.lsoda(rhs!, y0, tspan, reltol= 1e-4,abstol = Vector([1.e-6,1.e-10,1.e-6]),userdata = 2.)
-LSODA.lsoda_evolve!(ctx,y0,[1.,2.])#,userdata=2)
