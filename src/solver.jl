@@ -64,7 +64,7 @@ Solves a set of ordinary differential equations using the LSODA algorithm. The v
 """
 function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
   neq = Int32(length(y0))
-  userfun = UserFunctionAndData(f, userdata,neq)
+  userfun = UserFunctionAndData(f, userdata, neq)
 
   atol = ones(Float64,neq)
   rtol = ones(Float64,neq)
@@ -116,16 +116,18 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
 end
 
 """
-  lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data=nothing)
+  lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64})
 
-Solves a set of ordinary differential equations using the LSODA algorithm and the context variable ctx. This avoid re-allocating ctx. You have to be carefull to remember the current time of this function will return an error.
-
+Solves a set of ordinary differential equations using the LSODA algorithm and the context variable ctx. This avoid re-allocating ctx. You have to be carefull to remember the current time or this function will return an error.
 """
-function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data=nothing)
-	if data != nothing
-		ctx.data.userdata = data
-	end
+function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64})
 	@assert ctx.neq == length(y)
+	if userdata != nothing
+		# this functionality is not working yet
+		# ctx.data.data = userdata
+		# unsafe_pointer_to_objref(ctx.data).data = userdata
+	end
+	
 	t    = Array{Float64}(1)
 	tout = Array{Float64}(1)
 	t[1] = tspan[1]
