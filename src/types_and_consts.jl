@@ -66,7 +66,7 @@ typealias _lsoda_f Ptr{Void}
     data::Ptr{Void} = C_NULL ##
     neq::Cint = 0
     state::Cint = 0
-    error::Cstring = pointer("")
+    error::Cstring = Cstring(C_NULL)
     common::Ptr{lsoda_common_t} = C_NULL
     opt::Ptr{lsoda_opt_t} = C_NULL
 end

@@ -1,3 +1,6 @@
+include("/Users/rveltz/work/prog_gd/julia/LSODA.jl/src/LSODA.jl")
+using LSODA
+
 function rhs!(t, x, ydot, data)
 	ydot[1]=1.0E4 * x[2] * x[3] - .04E0 * x[1]
 	ydot[3]=3.0E7 * x[2] * x[2]
@@ -29,3 +32,4 @@ ctx, _ = LSODA.lsoda(rhs!, y0, tspan[1:2], reltol= 1e-4,abstol = Vector([1.e-6,1
 	LSODA.lsoda_evolve!(ctx,y0,tspan[k-1:k])
 	@printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",tspan[k],y0[1], y0[2], y0[3])
 end
+lsoda_free(ctx)
