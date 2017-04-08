@@ -1,5 +1,5 @@
-include("/Users/rveltz/work/prog_gd/julia/LSODA.jl/src/LSODA.jl")
-using LSODA
+# include("/Users/rveltz/work/prog_gd/julia/LSODA.jl/src/LSODA.jl")
+# using LSODA
 
 function rhs!(t, x, ydot, data)
 	ydot[1]=1.0E4 * x[2] * x[3] - .04E0 * x[1]
