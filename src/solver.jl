@@ -109,7 +109,7 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
   for k in 2:length(tspan)
 	tout[1] = tspan[k]
     lsoda(ctx,y,t,tout[1])
-	@assert (ctx.state >0) string("LSODA error istate = ", ctx.state)
+	@assert (ctx.state >0) string("LSODA error istate = ", ctx.state, ", error = ",unsafe_string(ctx.error))
 	yres[k,:] = copy(y)
   end
   return ctx, yres
