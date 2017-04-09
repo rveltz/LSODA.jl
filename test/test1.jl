@@ -1,5 +1,5 @@
-# push!(LOAD_PATH, "/Users/rveltz/work/prog_gd/julia")
-# using LSODA
+push!(LOAD_PATH, "/Users/rveltz/work/prog_gd/julia")
+using LSODA
 
 function fex{T1,T2,T3,T4}(t::T1, y::T2, ydot::T3, data::T4)
 	x = unsafe_wrap(Array,y,neq)
@@ -46,7 +46,8 @@ ctx = lsoda_context_t()
   ctx.neq = neq
   ctx.state = 1
 
-# lsoda_prepare(&ctx, &opt);
+ctx2 = Handle(ctx)
+
 lsoda_prepare(ctx,opt)
 
 @time for i=1:12
@@ -58,4 +59,6 @@ lsoda_prepare(ctx,opt)
 	tout[1] *= 10.0E0
 end
 println("Done!")
-lsoda_free(ctx)
+lsoda_reset(ctx)
+# lsoda_free(ctx)
+empty!(ctx2)
