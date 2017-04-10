@@ -10,6 +10,7 @@ function solve{uType,tType,isinplace}(
     abstol=1/10^6,reltol=1/10^3,
     tstops=Float64[],
     saveat=Float64[],maxiter=Int(1e5),
+    save_start=true,
     timeseries_errors=true,save_everystep= isempty(saveat),
     save_timeseries = nothing,
     userdata=nothing,kwargs...)
@@ -78,7 +79,7 @@ function solve{uType,tType,isinplace}(
     ttmp = [t0]
     t    = [t0]
     t2   = [t0]
-    ts   = [t0]
+    save_start ? ts = [t0] : ts = Vector{typeof(t0)}(0)
 
     neq = Int32(length(u0))
     userfun = UserFunctionAndData(f!, userdata,neq)
@@ -163,12 +164,13 @@ function solve{uType,tType,isinplace}(
     ### Finishing Routine
 
     timeseries = Vector{uType}(0)
+    save_start ? start_idx = 1 : start_idx = 2
     if typeof(prob.u0)<:Number
-        for i=1:length(ures)
+        for i=start_idx:length(ures)
             push!(timeseries,ures[i][1])
         end
     else
-        for i=1:length(ures)
+        for i=start_idx:length(ures)
             push!(timeseries,reshape(ures[i],sizeu))
         end
     end

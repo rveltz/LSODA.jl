@@ -28,3 +28,7 @@ end
 for k in 0:1/10:1
   @test k ∈ sol.t
 end
+
+sol = solve(prob,LSODAAlg(),save_start=false,saveat=1/10)
+sol.t[1] == 0.1
+sol.u[1] != prob.u0
