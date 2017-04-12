@@ -5,8 +5,6 @@ function lsodafun{T1,T2,T3}(t::T1,y::T2,yp::T3,userfun::UserFunctionAndData)
   return Int32(0)
 end
 
-const fex_c = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData}))
-
 function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
   neq = Int32(length(y0))
   userfun = UserFunctionAndData(f, userdata,neq)
@@ -42,7 +40,7 @@ function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userd
   #
 
   ctx = lsoda_context_t()
-    ctx.function_ = fex_c
+    ctx.function_ = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData}))
     ctx.neq = neq
     ctx.state = 1
     ctx.data = pointer_from_objref(userfun)
@@ -54,7 +52,6 @@ function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userd
     @printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",t[1],y[1], y[2], y[3])
     tout[1] *= 10.0E0
   end
-  return ctx
 end
 
 """
@@ -64,7 +61,7 @@ Solves a set of ordinary differential equations using the LSODA algorithm. The v
 """
 function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)
   neq = Int32(length(y0))
-  userfun = UserFunctionAndData(f, userdata,neq)
+  userfun = UserFunctionAndData(f, userdata, neq)
 
   atol = ones(Float64,neq)
   rtol = ones(Float64,neq)
@@ -97,33 +94,38 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
     opt.atol = pointer(atol)
     opt.itask = 1
 
-  ctx = lsoda_context_t()
-    ctx.function_ = fex_c
-    ctx.neq = neq
-    ctx.state = 1
-    ctx.data = pointer_from_objref(userfun)
+  ctx_ptr = lsoda_context_t()
+    ctx_ptr.function_ = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData}))
+    ctx_ptr.neq = neq
+    ctx_ptr.state = 1
+    ctx_ptr.data = pointer_from_objref(userfun)
 
-  lsoda_prepare(ctx,opt)
+  lsoda_prepare(ctx_ptr,opt)
   yres[1,:] = y0
 
   for k in 2:length(tspan)
 	tout[1] = tspan[k]
-    lsoda(ctx,y,t,tout[1])
-	@assert (ctx.state >0) string("LSODA error istate = ", ctx.state)
+    lsoda(ctx_ptr,y,t,tout[1])
+	@assert (ctx_ptr.state >0) string("LSODA error istate = ", ctx.state, ", error = ",unsafe_string(ctx_ptr.error))
 	yres[k,:] = copy(y)
   end
-  return ctx, yres
+  lsoda_free(ctx_ptr)
+  return yres
 end
 
 """
-  lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data=nothing)
+  lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64})
 
-Solves a set of ordinary differential equations using the LSODA algorithm and the context variable ctx. This avoid re-allocating ctx.
+Solves a set of ordinary differential equations using the LSODA algorithm and the context variable ctx. This avoid re-allocating ctx. You have to be carefull to remember the current time or this function will return an error.
 """
-function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64};data=nothing)
-	if data != nothing
-		ctx.data.userdata = data
-	end
+function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64})
+	@assert ctx.neq == length(y)
+# if userdata != nothing
+# 		# this functionality is not working yet
+# 		# ctx.data.data = userdata
+# 		# unsafe_pointer_to_objref(ctx.data).data = userdata
+# 	end
+	
 	t    = Array{Float64}(1)
 	tout = Array{Float64}(1)
 	t[1] = tspan[1]

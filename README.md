@@ -7,15 +7,13 @@
 
 # LSODA.jl
 
-## Introduction 
+## Introduction
 
 **LSODA.jl** is a Julia package that interfaces to the [liblsoda](https://github.com/sdwfrost/liblsoda) library, developed by [Simon Frost](http://www.vet.cam.ac.uk/directory/sdf22@cam.ac.uk) ([@sdwfrost](http://github.com/sdwfrost)), thereby providing a way to use the LSODA algorithm from Linda Petzold and Alan Hindmarsh from [Julia](http://julialang.org/). **[Clang.jl](https://github.com/ihnorton/Clang.jl)** has been used to write the library and **[Sundials.jl](https://github.com/JuliaDiffEq/Sundials.jl)** was a inspiring source.
 
 ## Installation
 
-To install this package, run the command `Pkg.clone("https://github.com/rveltz/LSODA.jl.git")`. Then you must build the package with
-`Pkg.build("LSODA")`.
-
+To install this package, run the command `Pkg.add("LSODA")`.
 ## Simplified Functions
 
 To solve an ODE, one can call the simplified solver:
@@ -61,7 +59,7 @@ at t =   4.0000e+10 y=   1.423392e-08   5.693574e-14   1.000000e+00
 
 The functionality of LSODA.jl can be accessed through the JuliaDiffEq common interface. To do this, you build a problem object for like:
 
-```
+```julia
 using DiffEqBase
 function rhs!(t, x, ydot, data)
     ydot[1]=1.0E4 * x[2] * x[3] - .04E0 * x[1]
@@ -75,10 +73,10 @@ tspan = (0., 0.4)
 prob = ODEProblem(rhs!,y0,tspan)
 ```
 
-This problem is solved by LSODA by using the LSODAAlg() algorithm in the common `solve` command as follows:
+This problem is solved by LSODA by using the lsoda() algorithm in the common `solve` command as follows:
 
-```
-sol = solve(prob,LSODAAlg())
+```julia
+sol = solve(prob,lsoda())
 ```
 
 Many keyword arguments can be used to control the solver, its tolerances, and its output formats. For more information, please see the [DifferentialEquations.jl documentation](https://juliadiffeq.github.io/DiffEqDocs.jl/latest/).

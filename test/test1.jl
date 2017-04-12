@@ -1,3 +1,6 @@
+push!(LOAD_PATH, "/Users/rveltz/work/prog_gd/julia")
+using LSODA
+
 function fex{T1,T2,T3,T4}(t::T1, y::T2, ydot::T3, data::T4)
 	x = unsafe_wrap(Array,y,neq)
 	xdot = unsafe_wrap(Array,ydot,neq)
@@ -9,7 +12,7 @@ function fex{T1,T2,T3,T4}(t::T1, y::T2, ydot::T3, data::T4)
 	return Int32(0)
 end
 
-const fex_c = cfunction(fex,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ptr{Void}))
+fex_c = cfunction(fex,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ptr{Void}))
 
 const atol = Array{Float64}(3)
 const rtol = Array{Float64}(3)
@@ -43,7 +46,8 @@ ctx = lsoda_context_t()
   ctx.neq = neq
   ctx.state = 1
 
-# lsoda_prepare(&ctx, &opt);
+ctx2 = Handle(ctx)
+
 lsoda_prepare(ctx,opt)
 
 @time for i=1:12
@@ -54,3 +58,7 @@ lsoda_prepare(ctx,opt)
 	end
 	tout[1] *= 10.0E0
 end
+println("Done!")
+lsoda_reset(ctx)
+# lsoda_free(ctx)
+empty!(ctx2)
