@@ -1,4 +1,4 @@
-# push!(LOAD_PATH, "/Users/rveltz/work/prog_gd/julia/repLSODA")
+push!(LOAD_PATH, "/Users/rveltz/work/prog_gd/julia")
 using LSODA
 
 function fex{T1,T2,T3,T4}(t::T1, y::T2, ydot::T3, data::T4)
@@ -46,15 +46,31 @@ ctx = lsoda_context_t()
   ctx.neq = neq
   ctx.state = 1
 
-lsoda_prepare(ctx,opt)
+# ctx2 = Handle(ctx)
 
-@time for i=1:12
-  lsoda(ctx,y,t,tout[1])
+ctx_ptr = Context_lsoda()
+opt_ptr = Opt_lsoda()
+
+println(ctx_ptr.handle,opt_ptr.handle)
+unsafe_store!(opt_ptr.handle,opt)
+unsafe_store!(ctx_ptr.handle,ctx)
+
+
+println(opt_ptr.handle,"\n\nopt = ",unsafe_load(opt_ptr.handle),"\n\nctx = ",unsafe_load(ctx_ptr.handle))
+println("--> prepare..." )
+# lsoda_prepare(ctx,opt)
+lsoda_prepare(ctx_ptr,opt_ptr)
+println("--> Done!" )
+for i=1:12
+  lsoda(ctx_ptr,y,t,tout[1])
   @printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",t[1],y[1], y[2], y[3])
-  if (ctx.state <= 0)
-			error("error istate = ", ctx.state)
+  if (unsafe_load(ctx_ptr.handle).state <= 0)
+			error("error istate = ", unsafe_load(ctx_ptr.handle).state, ", error = ",unsafe_string(unsafe_load(ctx_ptr.handle).error))
 	end
 	tout[1] *= 10.0E0
 end
-println("Done!")
-lsoda_free(ctx)
+println("-->done")
+# free memory
+ctx_ptr = 0
+ctx_ptr = 0
+gc()

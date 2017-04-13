@@ -59,7 +59,7 @@ end
 
 Solves a set of ordinary differential equations using the LSODA algorithm. The vector field encoded in an inplace f::Function needs to have the self-explanatory arguments f(t, y, ydot, data)
 """
-function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10,nbsteps = 10000)
+function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-5, abstol::Union{Float64,Vector}=1e-7,nbsteps = 10000)
   neq = Int32(length(y0))
   userfun = UserFunctionAndData(f, userdata, neq)
 
@@ -95,22 +95,31 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
     opt.atol = pointer(atol)
     opt.itask = 1
 
-  ctx_ptr = lsoda_context_t()
-    ctx_ptr.function_ = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData}))
-    ctx_ptr.neq = neq
-    ctx_ptr.state = 1
-    ctx_ptr.data = pointer_from_objref(userfun)
+  ctx = lsoda_context_t()
+    ctx.function_ = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData}))
+    ctx.neq = neq
+    ctx.state = 1
+    ctx.data = pointer_from_objref(userfun)
 
-  lsoda_prepare(ctx_ptr,opt)
+	ctx_ptr = Context_lsoda()
+	opt_ptr = Opt_lsoda()
+	unsafe_store!(opt_ptr.handle,opt)
+	unsafe_store!(ctx_ptr.handle,ctx)
+	
+  lsoda_prepare(ctx_ptr,opt_ptr)
   yres[1,:] = y0
 
   for k in 2:length(tspan)
 	tout[1] = tspan[k]
     lsoda(ctx_ptr,y,t,tout[1])
-	@assert (ctx_ptr.state >0) string("LSODA error istate = ", ctx_ptr.state, ", error = ",unsafe_string(ctx_ptr.error))
+	# @assert (unsafe_load(ctx_ptr.handle).state >0) string("LSODA error istate = ", unsafe_load(ctx_ptr.handle).state, ", error = ",unsafe_string(unsafe_load(ctx_ptr.handle).error))
+	if (unsafe_load(ctx_ptr.handle).state <=0)
+		warn(string("LSODA error istate = ", unsafe_load(ctx_ptr.handle).state, ", error = ",unsafe_string(unsafe_load(ctx_ptr.handle).error)))
+	end
 	yres[k,:] = copy(y)
   end
-  lsoda_free(ctx_ptr)
+
+  opt = 0 #free memory	
   return yres
 end
 

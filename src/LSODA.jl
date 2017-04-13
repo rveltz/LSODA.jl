@@ -15,7 +15,7 @@ else
     error("LSODA is not properly installed. Please run Pkg.build(\"LSODA\")")
 end
 
-export lsoda, lsoda_0, lsoda_opt_t, lsoda_context_t, lsoda_prepare, lsoda_reset, lsoda_opt_t, lsoda_free, lsoda_evolve!, UserFunctionAndData, Handle, empty!
+export lsoda, lsoda_0, lsoda_opt_t, lsoda_context_t, lsoda_prepare, lsoda_reset, lsoda_opt_t, lsoda_free, lsoda_evolve!, UserFunctionAndData, Handle, empty!, Context_lsoda, Opt_lsoda
 
 export LSODAAlgorithm, solve
 

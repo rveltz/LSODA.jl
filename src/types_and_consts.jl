@@ -2,7 +2,7 @@ using Parameters, Compat
 
 abstract AbstractLSODAObject
 
-@with_kw type lsoda_common_t <: AbstractLSODAObject
+@with_kw type lsoda_common_t 
     yh::Ptr{Ptr{Cdouble}}= C_NULL
     wm::Ptr{Ptr{Cdouble}}= C_NULL
     ewt::Ptr{Cdouble}= C_NULL
@@ -45,9 +45,9 @@ abstract AbstractLSODAObject
     miter::Cint = 0
 end
 
-@with_kw type lsoda_opt_t <: AbstractLSODAObject
+@with_kw type lsoda_opt_t 
 	  ixpr::Cint = 0
-    mxstep::Cint = 0
+    mxstep::Cint = 10000
     mxhnil::Cint = 0
     mxordn::Cint = 0
     mxords::Cint = 0
@@ -63,7 +63,7 @@ end
 
 typealias _lsoda_f Ptr{Void}
 
-@with_kw type lsoda_context_t <: AbstractLSODAObject
+@with_kw type lsoda_context_t 
     function_::_lsoda_f = C_NULL
     data::Ptr{Void} = C_NULL ##
     neq::Cint = 0
@@ -85,31 +85,94 @@ end
 # UserFunctionAndData(func::Function, data::Void) = func
 # UserFunctionAndData(func::Function, data::Void, neq::Cint) = func
 
+
+type Context_lsoda <: AbstractLSODAObject
+    handle::Ptr{lsoda_context_t}
+
+    #Default constructor to create a Stinger data structure
+    function Context_lsoda()
+        s = new(ccall((:lsoda_create_ctx,liblsoda),Ptr{lsoda_context_t},()))
+        finalizer(s, lsoda_free)
+        s
+    end
+end
+
+type Opt_lsoda <: AbstractLSODAObject
+    handle::Ptr{lsoda_opt_t}
+
+    #Default constructor to create a Stinger data structure
+    function Opt_lsoda()
+        s = new(ccall((:lsoda_create_opt,liblsoda),Ptr{lsoda_opt_t},()))
+        finalizer(s, lsoda_free)
+        s
+    end
+end
+##################################################################
 function lsoda_prepare(ctx::lsoda_context_t,opt::lsoda_opt_t)
   return ccall((:lsoda_prepare,liblsoda),Cint,
     (Ptr{lsoda_context_t},Ptr{lsoda_opt_t}),
     Ref(ctx),Ref(opt))
 end
 
+function lsoda_prepare(ctx::Ptr{lsoda_context_t},opt::Ptr{lsoda_opt_t})
+  return ccall((:lsoda_prepare,liblsoda),Cint,
+    (Ptr{lsoda_context_t},Ptr{lsoda_opt_t}),
+    (ctx),(opt))
+end
+
+lsoda_prepare(ctx::Context_lsoda,opt::Opt_lsoda)=lsoda_prepare(ctx.handle,opt.handle)
+
+##################################################################
 function lsoda(ctx::lsoda_context_t,y::Vector,t::Vector{Float64},tout)
   return ccall((:lsoda,liblsoda),Cint,
     (Ptr{lsoda_context_t},Ptr{Cdouble},Ptr{Cdouble},Cdouble),
     Ref(ctx),y,t,tout[1])
 end
 
+function lsoda(ctx::Ptr{lsoda_context_t},y::Vector,t::Vector{Float64},tout)
+  return ccall((:lsoda,liblsoda),Cint,
+    (Ptr{lsoda_context_t},Ptr{Cdouble},Ptr{Cdouble},Cdouble),ctx,y,t,tout[1])
+end
 
+lsoda(ctx::Context_lsoda,y::Vector,t::Vector{Float64},tout)=lsoda(ctx.handle,y,t,tout)
+##################################################################
 function lsoda_reset(ctx::lsoda_context_t)
 	ccall((:lsoda_reset,liblsoda),Void,(Ptr{lsoda_context_t},),Ref(ctx))
 end
 
-# written to wrap lsoda_free from C library but never used in practise as
-# lsoda_context_t variables are handled on Julia's side
+function lsoda_reset(ctx::Ptr{lsoda_context_t})
+	ccall((:lsoda_reset,liblsoda),Void,(Ptr{lsoda_context_t},),ctx)
+end
+##################################################################
 function lsoda_free(ctx::lsoda_context_t)
-		ccall((:lsoda_free,liblsoda),Void,(Ref{lsoda_context_t},),Ref(ctx))
+	ccall((:lsoda_free,liblsoda),Void,(Ptr{lsoda_context_t},),Ref(ctx))
     nothing
 end
 
-function lsoda_free(ctx::Ref{lsoda_context_t})
-		ccall((:lsoda_free,liblsoda),Void,(Ref{lsoda_context_t},),(ctx))
+function lsoda_free(ctx::Ptr{lsoda_context_t})
+	ccall((:lsoda_free,liblsoda),Void,(Ptr{lsoda_context_t},),ctx)
     nothing
 end
+
+function lsoda_free(opt::Ptr{lsoda_opt_t})
+	# println("--> lsoda_free = ",opt)
+	ccall((:lsoda_free_opt,liblsoda),Void,(Ptr{lsoda_opt_t},),opt)
+    nothing
+end
+
+function lsoda_free{T<: AbstractLSODAObject}(x::T)
+    # To prevent segfaults
+    # println("--> lsoda_free = ",x)
+    if x.handle != C_NULL
+        lsoda_free(x.handle)
+    end
+end
+##################################################################
+function lsoda_create_ctx()
+		return ccall((:lsoda_create_ctx,liblsoda),Ptr{lsoda_context_t},())
+end
+
+function lsoda_create_opt()
+		return ccall((:lsoda_create_opt,liblsoda),Ptr{lsoda_opt_t},())
+end
+##################################################################
