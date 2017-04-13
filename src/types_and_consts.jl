@@ -1,8 +1,6 @@
 using Parameters, Compat
 
-abstract AbstractLSODAObject
-
-@with_kw type lsoda_common_t <: AbstractLSODAObject
+@with_kw type lsoda_common_t 
     yh::Ptr{Ptr{Cdouble}}= C_NULL
     wm::Ptr{Ptr{Cdouble}}= C_NULL
     ewt::Ptr{Cdouble}= C_NULL
@@ -45,7 +43,7 @@ abstract AbstractLSODAObject
     miter::Cint = 0
 end
 
-@with_kw type lsoda_opt_t <: AbstractLSODAObject
+@with_kw type lsoda_opt_t 
 	  ixpr::Cint = 0
     mxstep::Cint = 0
     mxhnil::Cint = 0
@@ -63,7 +61,7 @@ end
 
 typealias _lsoda_f Ptr{Void}
 
-@with_kw type lsoda_context_t <: AbstractLSODAObject
+@with_kw type lsoda_context_t 
     function_::_lsoda_f = C_NULL
     data::Ptr{Void} = C_NULL ##
     neq::Cint = 0
