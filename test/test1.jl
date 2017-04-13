@@ -1,4 +1,4 @@
-# push!(LOAD_PATH, "/Users/rveltz/work/prog_gd/julia/repLSODA")
+push!(LOAD_PATH, "/Users/rveltz/work/prog_gd/julia")
 using LSODA
 
 function fex{T1,T2,T3,T4}(t::T1, y::T2, ydot::T3, data::T4)
