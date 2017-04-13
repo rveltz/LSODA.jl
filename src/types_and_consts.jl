@@ -2,7 +2,6 @@ using Parameters, Compat
 
 abstract AbstractLSODAObject
 
-
 @with_kw type lsoda_common_t <: AbstractLSODAObject
     yh::Ptr{Ptr{Cdouble}}= C_NULL
     wm::Ptr{Ptr{Cdouble}}= C_NULL
@@ -69,7 +68,7 @@ typealias _lsoda_f Ptr{Void}
     data::Ptr{Void} = C_NULL ##
     neq::Cint = 0
     state::Cint = 0
-    error::Cstring = Cstring(C_NULL)
+    error::Cstring = C_NULL
     common::Ptr{lsoda_common_t} = C_NULL
     opt::Ptr{lsoda_opt_t} = C_NULL
 end
