@@ -46,8 +46,6 @@ ctx = lsoda_context_t()
   ctx.neq = neq
   ctx.state = 1
 
-ctx2 = Handle(ctx)
-
 lsoda_prepare(ctx,opt)
 
 @time for i=1:12
@@ -59,6 +57,4 @@ lsoda_prepare(ctx,opt)
 	tout[1] *= 10.0E0
 end
 println("Done!")
-lsoda_reset(ctx)
-# lsoda_free(ctx)
-empty!(ctx2)
+lsoda_free(ctx)
