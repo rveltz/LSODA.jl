@@ -1,20 +1,42 @@
 ## Common Interface Solve Functions
 
-function solve{uType,tType,isinplace,F}(
-    prob::AbstractODEProblem{uType,tType,isinplace,F},
+function solve{uType,tType,isinplace}(
+    prob::AbstractODEProblem{uType,tType,isinplace},
     alg::LSODAAlgorithm,
     timeseries=[],ts=[],ks=[];
     abstol=1/10^6,reltol=1/10^3,
     tstops=Float64[],
     saveat=Float64[],maxiter=Int(1e5),
-    timeseries_errors=true,save_timeseries=true,
+    save_start=true,
+    timeseries_errors=true,save_everystep= isempty(saveat),
+    save_timeseries = nothing,
     userdata=nothing,kwargs...)
+
+    if save_timeseries != nothing
+        warn("save_timeseries is deprecated. Use save_everystep instead")
+        _save_everystep = save_timeseries
+    end
 
     tspan = prob.tspan
     t0 = tspan[1]
     T = tspan[end]
 
-    save_ts = sort(unique([t0;saveat;T]))
+    if typeof(saveat) <: Number
+      saveat_vec = convert(Vector{tType},saveat:saveat:(tspan[end]-saveat))
+      # Exclude the endpoint because of floating point issues
+    else
+      saveat_vec =  convert(Vector{tType},collect(saveat))
+    end
+
+    if !isempty(saveat_vec) && saveat_vec[end] == tspan[2]
+      pop!(saveat_vec)
+    end
+
+    if !isempty(saveat_vec) && saveat_vec[1] == tspan[1]
+      save_ts = sort(unique([saveat_vec;T]))
+    else
+      save_ts = sort(unique([t0;saveat_vec;T]))
+    end
 
     if T < save_ts[end]
         error("Final saving timepoint is past the solving timespan")
@@ -54,7 +76,7 @@ function solve{uType,tType,isinplace,F}(
     ttmp = [t0]
     t    = [t0]
     t2   = [t0]
-    ts   = [t0]
+    save_start ? ts = [t0] : ts = Vector{typeof(t0)}(0)
 
     neq = Int32(length(u0))
     userfun = UserFunctionAndData(f!, userdata,neq)
@@ -78,7 +100,7 @@ function solve{uType,tType,isinplace,F}(
     opt.ixpr = 0
     opt.rtol = pointer(rtol)
     opt.atol = pointer(atol)
-    if save_timeseries
+    if save_everystep
       itask_tmp = 2
     else
       itask_tmp = 1
@@ -97,40 +119,60 @@ function solve{uType,tType,isinplace,F}(
 
     for k in 2:length(save_ts)
       ttmp[1] = save_ts[k]
-      while t[1]<ttmp[1]
-        lsoda(ctx,utmp,t,ttmp[1])
-        if t[1]>ttmp[1] # overstepd, interpolate back
-          t2[1] = t[1] # save step values
-          copy!(utmp2,utmp) # save step values
-          opt.itask = 1 # change to interpolating
+      if t[1]<ttmp[1]
+        while t[1]<ttmp[1]
           lsoda(ctx,utmp,t,ttmp[1])
-          opt.itask = itask_tmp
-          push!(ures,copy(utmp))
-          push!(ts,t[1])
-          if k != length(save_ts) # don't overstep the last timestep
-            push!(ures,copy(utmp2))
-            push!(ts,t2[1])
+          if t[1]>ttmp[1] # overstepd, interpolate back
+            t2[1] = t[1] # save step values
+            copy!(utmp2,utmp) # save step values
+            opt.itask = 1 # change to interpolating
+            lsoda(ctx,utmp,t,ttmp[1])
+            opt.itask = itask_tmp
+            push!(ures,copy(utmp))
+            push!(ts,t[1])
+            if k != length(save_ts) && save_ts[k+1] > t2[1] # don't overstep the last timestep
+              push!(ures,copy(utmp2))
+              push!(ts,t2[1])
+            end
+            copy!(utmp,utmp2)
+            t[1] = t2[1]
+          else
+            push!(ures,copy(utmp))
+            push!(ts,t[1])
           end
-        else
-          push!(ures,copy(utmp))
-          push!(ts,t[1])
         end
+      else
+        t2[1] = t[1] # save step values
+        copy!(utmp2,utmp) # save step values
+        opt.itask = 1 # change to interpolating
+        lsoda(ctx,utmp,t,ttmp[1])
+        opt.itask = itask_tmp
+        push!(ures,copy(utmp))
+        push!(ts,t[1])
+        if k != length(save_ts) && save_ts[k+1] > t2[1] # don't overstep the last timestep
+          push!(ures,copy(utmp2))
+          push!(ts,t2[1])
+        end
+        copy!(utmp,utmp2)
+        t[1] = t2[1]
       end
     end
 
     ### Finishing Routine
 
     timeseries = Vector{uType}(0)
+    save_start ? start_idx = 1 : start_idx = 2
     if typeof(prob.u0)<:Number
-        for i=1:length(ures)
+        for i=start_idx:length(ures)
             push!(timeseries,ures[i][1])
         end
     else
-        for i=1:length(ures)
+        for i=start_idx:length(ures)
             push!(timeseries,reshape(ures[i],sizeu))
         end
     end
 
     build_solution(prob,alg,ts,timeseries,
-                      timeseries_errors = timeseries_errors)
+                      timeseries_errors = timeseries_errors,
+                      retcode = :Success)
 end
