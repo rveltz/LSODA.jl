@@ -1,4 +1,4 @@
-include("/Users/rveltz/work/prog_gd/julia/LSODA.jl/src/LSODA.jl")
+include("/Users/rveltz/work/prog_gd/julia/repLSODA/LSODA.jl/src/LSODA.jl")
 using LSODA
 
 function rhs!(t, x, ydot, data)
@@ -7,8 +7,6 @@ function rhs!(t, x, ydot, data)
 	ydot[2]=-ydot[1] - ydot[3]
   nothing
 end
-
-# rhs!(t, x, ydot) =  rhs!(t, x, ydot, 0.)
 
 y0 = [1.,0.,0.]
 println("\n####################################\n--> Use of a old wrapper for speed comparison")
