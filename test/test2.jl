@@ -1,4 +1,3 @@
-include("/Users/rveltz/work/prog_gd/julia/repLSODA/LSODA.jl/src/LSODA.jl")
 using LSODA
 
 function rhs!(t, x, ydot, data)
