@@ -5,7 +5,7 @@ module LSODA
 using Compat, DiffEqBase
 import DiffEqBase: solve
 
-abstract LSODAAlgorithm <: AbstractODEAlgorithm
+@compat abstract type LSODAAlgorithm <: AbstractODEAlgorithm end
 immutable lsoda <: LSODAAlgorithm end
 
 const depsfile = joinpath(dirname(dirname(@__FILE__)),"deps","deps.jl")
