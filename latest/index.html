@@ -46,28 +46,30 @@
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
 	<ul class="current">
+	  
           
-            <li>
-    <li class="toctree-l1 current">
-        <a class="current" href=".">Home</a>
-        
-            <ul>
+            <li class="toctree-l1 current">
+		
+    <a class="current" href=".">Home</a>
+    <ul class="subnav">
             
-                <li class="toctree-l3"><a href="#lsodajl-the-lsoda-algorithm-for-solving-ordinary-differential-equations">LSODA.jl: the LSODA algorithm for solving ordinary differential equations</a></li>
-                
-                    <li><a class="toctree-l4" href="#introduction">Introduction</a></li>
-                
-                    <li><a class="toctree-l4" href="#installation">Installation</a></li>
-                
-                    <li><a class="toctree-l4" href="#example">Example</a></li>
-                
-                    <li><a class="toctree-l4" href="#application-programming-interface">Application programming interface</a></li>
-                
-            
-            </ul>
+    <li class="toctree-l2"><a href="#lsodajl-the-lsoda-algorithm-for-solving-ordinary-differential-equations">LSODA.jl: the LSODA algorithm for solving ordinary differential equations</a></li>
+    
+        <ul>
         
-    </li>
-<li>
+            <li><a class="toctree-l3" href="#introduction">Introduction</a></li>
+        
+            <li><a class="toctree-l3" href="#installation">Installation</a></li>
+        
+            <li><a class="toctree-l3" href="#example">Example</a></li>
+        
+            <li><a class="toctree-l3" href="#application-programming-interface">Application programming interface</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
           
         </ul>
       </div>
@@ -169,12 +171,12 @@ at t =   4.0000e+10 y=   1.423392e-08   5.693574e-14   1.000000e+00</code></pre>
 <strong><code>LSODA.lsoda</code></strong> &mdash; <em>Type</em>.</p>
 <p>lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10)</p>
 <p>Solves a set of ordinary differential equations using the LSODA algorithm. The vector field encoded in an inplace f::Function needs to have the self-explanatory arguments f(t, y, ydot, data)</p>
-<p><a target='_blank' href='https://github.com/rveltz/LSODA.jl/tree/0e1e668c3506730989ce025503d97b8709569801/src/solver.jl#L60-L64' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/rveltz/LSODA.jl/tree/ec00d7cc175af2a2884b1df3b2eee333b51f02cb/src/solver.jl#L57-L61' class='documenter-source'>source</a><br></p>
 <p><a id='LSODA.lsoda_evolve!' href='#LSODA.lsoda_evolve!'>#</a>
 <strong><code>LSODA.lsoda_evolve!</code></strong> &mdash; <em>Function</em>.</p>
 <p>lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64})</p>
 <p>Solves a set of ordinary differential equations using the LSODA algorithm and the context variable ctx. This avoid re-allocating ctx. You have to be carefull to remember the current time or this function will return an error.</p>
-<p><a target='_blank' href='https://github.com/rveltz/LSODA.jl/tree/0e1e668c3506730989ce025503d97b8709569801/src/solver.jl#L118-L122' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/rveltz/LSODA.jl/tree/ec00d7cc175af2a2884b1df3b2eee333b51f02cb/src/solver.jl#L117-L121' class='documenter-source'>source</a><br></p>
               
             </div>
           </div>
@@ -201,7 +203,7 @@ at t =   4.0000e+10 y=   1.423392e-08   5.693574e-14   1.000000e+00</code></pre>
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/rveltz/LSODA.jl" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/rveltz/LSODA.jl" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
       
@@ -215,6 +217,6 @@ at t =   4.0000e+10 y=   1.423392e-08   5.693574e-14   1.000000e+00</code></pre>
 </html>
 
 <!--
-MkDocs version : 0.16.0
-Build Date UTC : 2016-12-20 14:13:23
+MkDocs version : 0.16.3
+Build Date UTC : 2017-04-14 05:51:47
 -->
