@@ -8,6 +8,7 @@ function solve{uType,tType,isinplace}(
     tstops=Float64[],
     saveat=Float64[],maxiter=Int(1e5),
     save_start=true,
+    callback = nothing,
     timeseries_errors=true,save_everystep= isempty(saveat),
     save_timeseries = nothing,
     userdata=nothing,kwargs...)
@@ -21,7 +22,7 @@ function solve{uType,tType,isinplace}(
         error("This solver is not able to use mass matrices.")
     end
 
-    if callback != nothing
+    if callback != nothing || prob.callback != nothing
         error("LSODA is not compatible with callbacks.")
     end
 
