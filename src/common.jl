@@ -4,6 +4,8 @@ function solve{uType,tType,isinplace}(
     prob::AbstractODEProblem{uType,tType,isinplace},
     alg::LSODAAlgorithm,
     timeseries=[],ts=[],ks=[];
+
+    verbose=true,
     abstol=1/10^6,reltol=1/10^3,
     tstops=Float64[],
     saveat=Float64[],maxiter=Int(1e5),
@@ -12,6 +14,8 @@ function solve{uType,tType,isinplace}(
     timeseries_errors=true,save_everystep= isempty(saveat),
     save_timeseries = nothing,
     userdata=nothing,kwargs...)
+
+    verbose && !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
 
     if save_timeseries != nothing
         warn("save_timeseries is deprecated. Use save_everystep instead")
@@ -31,20 +35,20 @@ function solve{uType,tType,isinplace}(
     T = tspan[end]
 
     if typeof(saveat) <: Number
-      saveat_vec = convert(Vector{tType},saveat+tspan[1]:saveat:(tspan[end]-saveat))
-      # Exclude the endpoint because of floating point issues
+        saveat_vec = convert(Vector{tType},saveat+tspan[1]:saveat:(tspan[end]-saveat))
+        # Exclude the endpoint because of floating point issues
     else
-      saveat_vec =  convert(Vector{tType},collect(saveat))
+        saveat_vec =  convert(Vector{tType},collect(saveat))
     end
 
     if !isempty(saveat_vec) && saveat_vec[end] == tspan[2]
-      pop!(saveat_vec)
+        pop!(saveat_vec)
     end
 
     if !isempty(saveat_vec) && saveat_vec[1] == tspan[1]
-      save_ts = sort(unique([saveat_vec;T]))
+        save_ts = sort(unique([saveat_vec;T]))
     else
-      save_ts = sort(unique([t0;saveat_vec;T]))
+        save_ts = sort(unique([t0;saveat_vec;T]))
     end
 
     if T < save_ts[end]
@@ -94,15 +98,15 @@ function solve{uType,tType,isinplace}(
     rtol = ones(Float64,neq)
 
     if typeof(abstol) == Float64
-      atol *= abstol
+        atol *= abstol
     else
-      atol = copy(abstol)
+        atol = copy(abstol)
     end
 
     if typeof(reltol) == Float64
-      rtol *= reltol
+        rtol *= reltol
     else
-      rtol = copy(reltol)
+        rtol = copy(reltol)
     end
 
     opt = lsoda_opt_t()
@@ -110,9 +114,9 @@ function solve{uType,tType,isinplace}(
     opt.rtol = pointer(rtol)
     opt.atol = pointer(atol)
     if save_everystep
-      itask_tmp = 2
+        itask_tmp = 2
     else
-      itask_tmp = 1
+        itask_tmp = 1
     end
     opt.itask = itask_tmp
 
