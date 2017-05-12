@@ -5,6 +5,16 @@ module LSODA
 using Compat, DiffEqBase
 import DiffEqBase: solve
 
+const warnkeywords =
+    (:save_idxs, :d_discontinuities, :isoutofdomain, :unstable_check,
+     :calck, :progress, :timeseries_steps, :dense,
+     :dtmin, :dtmax,
+     :internalnorm, :gamma, :beta1, :beta2, :qmax, :qmin, :qoldinit)
+
+function __init__()
+    const global warnlist = Set(warnkeywords)
+end
+
 @compat abstract type LSODAAlgorithm <: AbstractODEAlgorithm end
 immutable lsoda <: LSODAAlgorithm end
 
