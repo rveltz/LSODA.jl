@@ -18,18 +18,18 @@ function solve{uType,tType,isinplace}(
     kwargs...)
 
     if verbose
-        warned = false
-        isempty(kwargs) || check_keywords(alg, kwargs, warnlist)
-        if has_tgrad(prob.f)
-            warn("Explicit t-gradient given to this stiff solver is ignored.")
-            warned = true
+        warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
+        if !(typeof(prob.f) <: AbstractParameterizedFunction)
+            if has_tgrad(prob.f)
+                warn("Explicit t-gradient given to this stiff solver is ignored.")
+                warned = true
+            end
+            if has_jac(prob.f)
+                warn("Explicit Jacobian given to this stiff solver is ignored.")
+                warned = true
+            end
         end
-        if has_jac(prob.f)
-            warn("Explicit Jacobian given to this stiff solver is ignored.")
-            warned = true
-        end
-        warned &&
-            warn("See http://docs.juliadiffeq.org/latest/basics/compatibility_chart.html")
+        warned && warn_compat()
     end
 
     if save_timeseries != nothing
