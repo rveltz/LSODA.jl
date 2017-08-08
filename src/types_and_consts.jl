@@ -59,7 +59,9 @@ end
     atol::Ptr{Cdouble} = C_NULL
 end
 
-typealias _lsoda_f Ptr{Void}
+# typealias _lsoda_f Ptr{Void} #: it was for v0.5
+const _lsoda_f = Ptr{Void}
+
 
 @with_kw type lsoda_context_t 
     function_::_lsoda_f = C_NULL
@@ -70,7 +72,8 @@ typealias _lsoda_f Ptr{Void}
     common::Ptr{lsoda_common_t} = C_NULL
     opt::Ptr{lsoda_opt_t} = C_NULL
 end
-typealias lsoda_context_t_ptr Ptr{lsoda_context_t}
+# typealias lsoda_context_t_ptr Ptr{lsoda_context_t}# it was for v0.5
+const lsoda_context_t_ptr = Ptr{lsoda_context_t}
 
 type UserFunctionAndData
     func::Function
