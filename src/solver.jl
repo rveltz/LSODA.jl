@@ -59,7 +59,7 @@ end
 
 Solves a set of ordinary differential equations using the LSODA algorithm. The vector field encoded in an inplace f::Function needs to have the self-explanatory arguments f(t, y, ydot, data)
 """
-function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10,nbsteps = 10000)
+function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdata::Any=nothing, reltol::Union{Float64,Vector}=1e-4, abstol::Union{Float64,Vector}=1e-10,nbsteps = 10000,progressbar=false)
   neq = Int32(length(y0))
   userfun = UserFunctionAndData(f, userdata, neq)
 
@@ -104,11 +104,20 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
   lsoda_prepare(ctx_ptr,opt)
   yres[1,:] = y0
 
-  for k in 2:length(tspan)
-	tout[1] = tspan[k]
-    lsoda(ctx_ptr,y,t,tout[1])
-	@assert (ctx_ptr.state >0) string("LSODA error istate = ", ctx_ptr.state, ", error = ",unsafe_string(ctx_ptr.error))
-	yres[k,:] = copy(y)
+  if progressbar
+	  @showprogress for k in 2:length(tspan)
+		tout[1] = tspan[k]
+	    lsoda(ctx_ptr,y,t,tout[1])
+		@assert (ctx_ptr.state >0) string("LSODA error istate = ", ctx_ptr.state, ", error = ",unsafe_string(ctx_ptr.error))
+		yres[k,:] = copy(y)
+	  end
+  else
+	  for k in 2:length(tspan)
+		tout[1] = tspan[k]
+	    lsoda(ctx_ptr,y,t,tout[1])
+		@assert (ctx_ptr.state >0) string("LSODA error istate = ", ctx_ptr.state, ", error = ",unsafe_string(ctx_ptr.error))
+		yres[k,:] = copy(y)
+	  end
   end
   lsoda_free(ctx_ptr)
   return yres
