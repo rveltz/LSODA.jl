@@ -13,7 +13,6 @@ function solve{uType,tType,isinplace}(
     callback=nothing,
     timeseries_errors=true,
     save_everystep=isempty(saveat),
-    save_timeseries=nothing,
     userdata=nothing,
     kwargs...)
 
@@ -30,11 +29,6 @@ function solve{uType,tType,isinplace}(
             end
         end
         warned && warn_compat()
-    end
-
-    if save_timeseries != nothing
-        warn("save_timeseries is deprecated. Use save_everystep instead")
-        _save_everystep = save_timeseries
     end
 
     if prob.mass_matrix != I
@@ -127,7 +121,7 @@ function solve{uType,tType,isinplace}(
         rtol = copy(reltol)
     end
 
-    opt = lsoda_opt_t()
+    opt = lsoda_opt_t(mxstep = maxiter)
     opt.ixpr = 0
     opt.rtol = pointer(rtol)
     opt.atol = pointer(atol)
