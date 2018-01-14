@@ -3,4 +3,7 @@
 *.jl.*.cov
 *.jl.mem
 docs/build/
-docs/site/
+deps/bin32/
+deps/bin64/
+deps/downloads/
+deps/deps.jl
