@@ -5,5 +5,7 @@
 docs/build/
 deps/bin32/
 deps/bin64/
+deps/src/
+deps/usr/
 deps/downloads/
 deps/deps.jl
