@@ -198,6 +198,8 @@ function solve{uType,tType,isinplace}(
         end
     end
 
+    lsoda_free(ctx)
+
     build_solution(prob, alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,
                    retcode = :Success)
