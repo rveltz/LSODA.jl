@@ -13,7 +13,6 @@ function solve{uType,tType,isinplace}(
     callback=nothing,
     timeseries_errors=true,
     save_everystep=isempty(saveat),
-    save_timeseries=nothing,
     userdata=nothing,
     kwargs...)
 
@@ -32,11 +31,6 @@ function solve{uType,tType,isinplace}(
         warned && warn_compat()
     end
 
-    if save_timeseries != nothing
-        warn("save_timeseries is deprecated. Use save_everystep instead")
-        _save_everystep = save_timeseries
-    end
-
     if prob.mass_matrix != I
         error("This solver is not able to use mass matrices.")
     end
@@ -50,8 +44,11 @@ function solve{uType,tType,isinplace}(
     T = tspan[end]
 
     if typeof(saveat) <: Number
-        saveat_vec = convert(Vector{tType},saveat+tspan[1]:saveat:(tspan[end]-saveat))
-        # Exclude the endpoint because of floating point issues
+        if (tspan[1]:saveat:tspan[end])[end] == tspan[end]
+          saveat_vec = convert(Vector{tType},collect(tType,tspan[1]+saveat:saveat:tspan[end]))
+        else
+          saveat_vec = convert(Vector{tType},collect(tType,tspan[1]+saveat:saveat:(tspan[end]-saveat)))
+        end
     else
         saveat_vec =  convert(Vector{tType},collect(saveat))
     end
@@ -124,7 +121,7 @@ function solve{uType,tType,isinplace}(
         rtol = copy(reltol)
     end
 
-    opt = lsoda_opt_t()
+    opt = lsoda_opt_t(mxstep = maxiter)
     opt.ixpr = 0
     opt.rtol = pointer(rtol)
     opt.atol = pointer(atol)
@@ -200,6 +197,8 @@ function solve{uType,tType,isinplace}(
             push!(timeseries,reshape(ures[i],sizeu))
         end
     end
+
+    lsoda_free(ctx)
 
     build_solution(prob, alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,

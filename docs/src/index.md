@@ -15,13 +15,13 @@ To install this package, run the command `Pkg.clone("https://github.com/rveltz/L
 
 We first need to load the library.
 
-```example 1
+```julia
 using LSODA
 ```
 
 We next need to define a function that provides the derivatives `ydot` given the time, `t`, initial conditions, `y`, and optionally some additional data, `data`. Note that this function modifies `ydot` in-place and returns `nothing`.
 
-```example 1
+```julia
 function rhs!(t, y, ydot, data)
 	ydot[1]=1.0E4 * y[2] * y[3] - .04E0 * y[1]
 	ydot[3]=3.0E7 * y[2] * y[2]
@@ -32,7 +32,7 @@ end
 
 The model can be solved by providing an initial condition for the state variables, and a time span over which to simulate.
 
-```example 1
+```
 y0 = [1.,0.,0.]
 tspan = [0., 0.4]
 res =  lsoda(rhs!, y0, tspan, reltol= 1e-4, abstol = Vector([1.e-6,1.e-10,1.e-6]))
@@ -40,7 +40,7 @@ res =  lsoda(rhs!, y0, tspan, reltol= 1e-4, abstol = Vector([1.e-6,1.e-10,1.e-6]
 
 This should give the following.
 
-```example 1
+```
 at t =   4.0000e-01 y=   9.851712e-01   3.386380e-05   1.479493e-02
 at t =   4.0000e+00 y=   9.055333e-01   2.240655e-05   9.444430e-02
 at t =   4.0000e+01 y=   7.158403e-01   9.186334e-06   2.841505e-01
