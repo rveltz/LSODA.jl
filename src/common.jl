@@ -139,6 +139,7 @@ function solve{uType,tType,isinplace}(
     ctx.neq = neq
     ctx.state = 1
     ctx.data = pointer_from_objref(userfun)
+    ch = ContextHandle(ctx)
 
     lsoda_prepare(ctx,opt)
 
@@ -198,7 +199,7 @@ function solve{uType,tType,isinplace}(
         end
     end
 
-    lsoda_free(ctx)
+    lsoda_free(ch)
 
     build_solution(prob, alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,
