@@ -110,7 +110,7 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
 		@assert (ctx_ptr.state >0) string("LSODA error istate = ", ctx_ptr.state, ", error = ",unsafe_string(ctx_ptr.error))
 		yres[k,:] = copy(y)
   end
-  
+
   lsoda_free(ctx_ptr)
   return yres
 end
@@ -127,7 +127,7 @@ function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Flo
 # 		# ctx.data.data = userdata
 # 		# unsafe_pointer_to_objref(ctx.data).data = userdata
 # 	end
-	
+
 	t    = Array{Float64}(1)
 	tout = Array{Float64}(1)
 	t[1] = tspan[1]
