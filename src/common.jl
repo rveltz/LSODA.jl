@@ -22,10 +22,10 @@ function solve{uType,tType,isinplace}(
     abstol=1/10^6,reltol=1/10^3,
     tstops=Float64[],
     saveat=Float64[], maxiter=Int(1e5),
-    save_start=true,
     callback=nothing,
     timeseries_errors=true,
     save_everystep=isempty(saveat),
+    save_start = save_everystep || isempty(saveat) || typeof(saveat) <: Number ? true : prob.tspan[1] in saveat,
     userdata=nothing,
     kwargs...)
 
