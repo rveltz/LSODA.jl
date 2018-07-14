@@ -1,4 +1,4 @@
-using LSODA
+using LSODA, Printf
 
 function fex{T1,T2,T3,T4}(t::T1, y::T2, ydot::T3, data::T4)
 	x = unsafe_wrap(Array,y,neq)
@@ -11,13 +11,13 @@ function fex{T1,T2,T3,T4}(t::T1, y::T2, ydot::T3, data::T4)
 	return Int32(0)
 end
 
-fex_c = cfunction(fex,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ptr{Void}))
+fex_c = @cfunction(fex,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ptr{Nothing}))
 
-const atol = Array{Float64}(3)
-const rtol = Array{Float64}(3)
-t = Array{Float64}(1)
-tout = Array{Float64}(1)
-const y = Array{Float64}(3)
+const atol = Array{Float64}(undef,3)
+const rtol = Array{Float64}(undef,3)
+t = Array{Float64}(undef,1)
+tout = Array{Float64}(undef,1)
+const y = Array{Float64}(undef,3)
 
 const neq = Int32(3)
 

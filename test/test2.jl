@@ -15,7 +15,7 @@ tspan = [0., 0.4]
 
 # case with a vector
 println("\n####################################\n--> Use of a vector of times where output is required")
-tspan = [4.*10.0^k for k=-1:10]
+tspan = [4.0.*10.0^k for k=-1:10]
 res = LSODA.lsoda(rhs!, y0, tspan, reltol= 1e-4,abstol = Vector([1.e-6,1.e-10,1.e-6]))
 res = @time LSODA.lsoda(rhs!, y0, tspan, reltol= 1e-4,abstol = Vector([1.e-6,1.e-10,1.e-6]))
 println(res)

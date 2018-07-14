@@ -1,6 +1,10 @@
+@noinline function old_cfunction(f, r, a)
+  ccall(:jl_function_ptr, Ptr{Cvoid}, (Any, Any, Any), f, r, a)
+end
+
 ## Common Interface Solve Functions
 
-type CommonFunction{F,P}
+mutable struct CommonFunction{F,P}
     func::F
     p::P
     neq::Cint
@@ -13,8 +17,8 @@ function commonfun(t::T1,y::T2,yp::T3,comfun::CommonFunction) where {T1,T2,T3}
   return Int32(0)
 end
 
-function solve{uType,tType,isinplace}(
-    prob::AbstractODEProblem{uType,tType,isinplace},
+function solve(
+    prob::DiffEqBase.AbstractODEProblem{uType,tupType,isinplace},
     alg::LSODAAlgorithm,
     timeseries=[],ts=[],ks=[];
 
@@ -27,17 +31,19 @@ function solve{uType,tType,isinplace}(
     save_everystep=isempty(saveat),
     save_start = save_everystep || isempty(saveat) || typeof(saveat) <: Number ? true : prob.tspan[1] in saveat,
     userdata=nothing,
-    kwargs...)
+    kwargs...) where {uType,tupType,isinplace}
+
+    tType = eltype(tupType)
 
     if verbose
         warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
-        if !(typeof(prob.f) <: AbstractParameterizedFunction)
-            if has_tgrad(prob.f)
-                warn("Explicit t-gradient given to this stiff solver is ignored.")
+        if !(typeof(prob.f) <: DiffEqBase.AbstractParameterizedFunction)
+            if DiffEqBase.has_tgrad(prob.f)
+                @warn("Explicit t-gradient given to this stiff solver is ignored.")
                 warned = true
             end
-            if has_jac(prob.f)
-                warn("Explicit Jacobian given to this stiff solver is ignored.")
+            if DiffEqBase.has_jac(prob.f)
+                @warn("Explicit Jacobian given to this stiff solver is ignored.")
                 warned = true
             end
         end
@@ -106,14 +112,14 @@ function solve{uType,tType,isinplace}(
         f! = (du,u,p,t) -> (prob.f(reshape(du,sizeu),reshape(u,sizeu),p,t); nothing)
     end
 
-    ures = Vector{Vector{Float64}}()
+    ures = Vector{Float64}[]
     push!(ures,u0)
     utmp = copy(u0)
     utmp2= copy(u0)
     ttmp = [t0]
     t    = [t0]
     t2   = [t0]
-    save_start ? ts = [t0] : ts = Vector{typeof(t0)}(0)
+    save_start ? ts = [t0] : ts = typeof(t0)[]
 
     neq = Int32(length(u0))
     comfun = CommonFunction(f!,prob.p,neq)
@@ -144,7 +150,7 @@ function solve{uType,tType,isinplace}(
     end
     opt.itask = itask_tmp
 
-    const fex_c = cfunction(commonfun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{typeof(comfun)}))
+    fex_c = old_cfunction(commonfun,Cint,Tuple{Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{typeof(comfun)}})
 
     ctx = lsoda_context_t()
     ctx.function_ = fex_c
@@ -162,7 +168,7 @@ function solve{uType,tType,isinplace}(
                 lsoda(ctx, utmp, t, ttmp[1])
                 if t[1] > ttmp[1] # overstepd, interpolate back
                     t2[1] = t[1] # save step values
-                    copy!(utmp2,utmp) # save step values
+                    copyto!(utmp2,utmp) # save step values
                     opt.itask = 1 # change to interpolating
                     lsoda(ctx, utmp, t, ttmp[1])
                     opt.itask = itask_tmp
@@ -173,7 +179,7 @@ function solve{uType,tType,isinplace}(
                         push!(ures, copy(utmp2))
                         push!(ts, t2[1])
                     end
-                    copy!(utmp, utmp2)
+                    copyto!(utmp, utmp2)
                     t[1] = t2[1]
                 else
                     push!(ures, copy(utmp))
@@ -182,7 +188,7 @@ function solve{uType,tType,isinplace}(
             end
       else
             t2[1] = t[1] # save step values
-            copy!(utmp2, utmp) # save step values
+            copyto!(utmp2, utmp) # save step values
             opt.itask = 1 # change to interpolating
             lsoda(ctx, utmp, t, ttmp[1])
             opt.itask = itask_tmp
@@ -192,14 +198,14 @@ function solve{uType,tType,isinplace}(
                 push!(ures,copy(utmp2))
                 push!(ts,t2[1])
             end
-            copy!(utmp,utmp2)
+            copyto!(utmp,utmp2)
             t[1] = t2[1]
         end
     end
 
     ### Finishing Routine
 
-    timeseries = Vector{uType}(0)
+    timeseries = uType[]
     save_start ? start_idx = 1 : start_idx = 2
     if typeof(prob.u0)<:Number
         for i=start_idx:length(ures)
@@ -213,7 +219,7 @@ function solve{uType,tType,isinplace}(
 
     lsoda_free(ch)
 
-    build_solution(prob, alg, ts, timeseries,
+    DiffEqBase.build_solution(prob, alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,
                    retcode = :Success)
 end

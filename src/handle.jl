@@ -5,7 +5,7 @@ mutable struct ContextHandle <: AbstractLSODAHandle
     freed::Bool
     function (::Type{ContextHandle})(ctx::lsoda_context_t)
         h = new(ctx,false)
-        finalizer(h, release_handle)
+        finalizer(release_handle,h)
         return h
     end
 end

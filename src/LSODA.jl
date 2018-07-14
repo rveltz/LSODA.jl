@@ -4,6 +4,7 @@ module LSODA
 
 using Compat, DiffEqBase
 import DiffEqBase: solve
+using LinearAlgebra, Printf
 
 const warnkeywords =
     (:save_idxs, :d_discontinuities, :isoutofdomain, :unstable_check,
@@ -12,11 +13,11 @@ const warnkeywords =
      :internalnorm, :gamma, :beta1, :beta2, :qmax, :qmin, :qoldinit)
 
 function __init__()
-    const global warnlist = Set(warnkeywords)
+    global warnlist = Set(warnkeywords)
 end
 
-@compat abstract type LSODAAlgorithm <: AbstractODEAlgorithm end
-immutable lsoda <: LSODAAlgorithm end
+@compat abstract type LSODAAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
+struct lsoda <: LSODAAlgorithm end
 
 const depsfile = joinpath(dirname(dirname(@__FILE__)),"deps","deps.jl")
 if isfile(depsfile)

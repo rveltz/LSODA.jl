@@ -24,13 +24,10 @@ function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userd
     rtol = copy(reltol)
   end
 
-  t = Array{Float64}(1)
-  tout = Array{Float64}(1)
-  y = Array{Float64}(neq)
+  t = Float64[tspan[1]]
+  tout = Float64[tspan[2]]
   y = copy(y0)
 
-  t[1] = tspan[1]
-  tout[1] = tspan[2]
   #
   opt = lsoda_opt_t()
     opt.ixpr = 0
@@ -40,7 +37,7 @@ function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userd
   #
 
   ctx = lsoda_context_t()
-    ctx.function_ = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData}))
+    ctx.function_ = @cfunction($lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData})).ptr
     ctx.neq = neq
     ctx.state = 1
     ctx.data = pointer_from_objref(userfun)
@@ -48,7 +45,7 @@ function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userd
   lsoda_prepare(ctx,opt)
   for i=1:12
     lsoda(ctx,y,t,tout[1])
-	@assert (ctx.state >0) string("LSODA error istate = ", ctx.state)
+	  @assert (ctx.state >0) string("LSODA error istate = ", ctx.state)
     @printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",t[1],y[1], y[2], y[3])
     tout[1] *= 10.0E0
   end
@@ -80,13 +77,9 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
     rtol = copy(reltol)
   end
 
-  t    = Array{Float64}(1)
-  tout = Array{Float64}(1)
-  y    = Array{Float64}(neq)
+  t    = Float64[tspan[1]]
+  tout = Float64[tspan[2]]
   y    = copy(y0)
-
-  t[1]    = tspan[1]
-  tout[1] = tspan[2]
 
   opt = lsoda_opt_t()
     opt.mxstep = nbsteps
@@ -96,7 +89,7 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
     opt.itask = 1
 
   ctx_ptr = lsoda_context_t()
-    ctx_ptr.function_ = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData}))
+    ctx_ptr.function_ = @cfunction($lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData})).ptr
     ctx_ptr.neq = neq
     ctx_ptr.state = 1
     ctx_ptr.data = pointer_from_objref(userfun)
@@ -106,7 +99,7 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
 
   for k in 2:length(tspan)
 		tout[1] = tspan[k]
-	    lsoda(ctx_ptr,y,t,tout[1])
+	  lsoda(ctx_ptr,y,t,tout[1])
 		@assert (ctx_ptr.state >0) string("LSODA error istate = ", ctx_ptr.state, ", error = ",unsafe_string(ctx_ptr.error))
 		yres[k,:] = copy(y)
   end
@@ -128,10 +121,8 @@ function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Flo
 # 		# unsafe_pointer_to_objref(ctx.data).data = userdata
 # 	end
 
-	t    = Array{Float64}(1)
-	tout = Array{Float64}(1)
-	t[1] = tspan[1]
-	tout[1] = tspan[2]
+	t    = Float64[tspan[1]]
+	tout = Float64[tspan[2]]
 	lsoda(ctx,y,t,tout[1])
 	@assert (ctx.state >0) string("LSODA error istate = ", ctx.state)
 end
