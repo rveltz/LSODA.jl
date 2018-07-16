@@ -1,7 +1,7 @@
 ## Common Interface Solve Functions
 
 function solve{uType,tType,isinplace}(
-    prob::AbstractODEProblem{uType,tType,isinplace},
+    prob::DiffEqBase.AbstractODEProblem{uType,tType,isinplace},
     alg::LSODAAlgorithm,
     timeseries=[],ts=[],ks=[];
 

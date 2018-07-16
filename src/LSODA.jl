@@ -15,7 +15,7 @@ function __init__()
     const global warnlist = Set(warnkeywords)
 end
 
-@compat abstract type LSODAAlgorithm <: AbstractODEAlgorithm end
+@compat abstract type LSODAAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 immutable lsoda <: LSODAAlgorithm end
 
 const depsfile = joinpath(dirname(dirname(@__FILE__)),"deps","deps.jl")
