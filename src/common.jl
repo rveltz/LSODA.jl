@@ -50,7 +50,7 @@ function solve(
         warned && warn_compat()
     end
 
-    if prob.mass_matrix != I
+    if prob.f.mass_matrix != I
         error("This solver is not able to use mass matrices.")
     end
 
