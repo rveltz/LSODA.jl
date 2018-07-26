@@ -16,6 +16,7 @@ function __init__()
     global warnlist = Set(warnkeywords)
 end
 
+abstract type LSODAAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 @compat abstract type LSODAAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 struct lsoda <: LSODAAlgorithm end
 
