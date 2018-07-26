@@ -1,4 +1,4 @@
-function lsodafun{T1,T2,T3}(t::T1,y::T2,yp::T3,userfun::UserFunctionAndData)
+function lsodafun(t::T1, y::T2, yp::T3, userfun::UserFunctionAndData) where {T1, T2, T3}
   y_ = unsafe_wrap(Array,y,userfun.neq)
   ydot_ = unsafe_wrap(Array,yp,userfun.neq)
   userfun.func(t, y_, ydot_,userfun.data)

@@ -49,7 +49,7 @@ lsoda_prepare(ctx,opt)
 
 @time for i=1:12
   lsoda(ctx,y,t,tout[1])
-  @printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",t[1],y[1], y[2], y[3])
+  Printf.@printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",t[1],y[1], y[2], y[3])
   if (ctx.state <= 0)
 			error("error istate = ", ctx.state)
 	end
