@@ -1,4 +1,4 @@
-using LSODA, DiffEqProblemLibrary, Base.Test
+using LSODA, DiffEqProblemLibrary, Test
 prob = prob_ode_linear
 sol = solve(prob,lsoda(),saveat=[1/2])
 @test sol.t == [0,1/2,1]

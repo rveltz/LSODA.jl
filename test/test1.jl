@@ -1,6 +1,6 @@
-using LSODA
+using LSODA, Printf
 
-function fex{T1,T2,T3,T4}(t::T1, y::T2, ydot::T3, data::T4)
+function fex(t::T1, y::T2, ydot::T3, data::T4) where {T1, T2, T3, T4}
 	x = unsafe_wrap(Array,y,neq)
 	xdot = unsafe_wrap(Array,ydot,neq)
 
@@ -11,13 +11,13 @@ function fex{T1,T2,T3,T4}(t::T1, y::T2, ydot::T3, data::T4)
 	return Int32(0)
 end
 
-fex_c = cfunction(fex,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ptr{Void}))
+fex_c = cfunction(fex,Cint,Tuple{(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ptr{Nothing})...})
 
-const atol = Array{Float64}(3)
-const rtol = Array{Float64}(3)
-t = Array{Float64}(1)
-tout = Array{Float64}(1)
-const y = Array{Float64}(3)
+const atol = Array{Float64}(undef,3)
+const rtol = Array{Float64}(undef,3)
+t = Array{Float64}(undef,1)
+tout = Array{Float64}(undef,1)
+const y = Array{Float64}(undef,3)
 
 const neq = Int32(3)
 
@@ -49,7 +49,7 @@ lsoda_prepare(ctx,opt)
 
 @time for i=1:12
   lsoda(ctx,y,t,tout[1])
-  @printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",t[1],y[1], y[2], y[3])
+  Printf("at t = %12.4e y= %14.6e %14.6e %14.6e\n",t[1],y[1], y[2], y[3])
   if (ctx.state <= 0)
 			error("error istate = ", ctx.state)
 	end

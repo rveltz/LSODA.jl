@@ -24,9 +24,9 @@ function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userd
     rtol = copy(reltol)
   end
 
-  t = Array{Float64}(1)
-  tout = Array{Float64}(1)
-  y = Array{Float64}(neq)
+  t = Array{Float64}(undef,1)
+  tout = Array{Float64}(undef,1)
+  y = Array{Float64}(undef,neq)
   y = copy(y0)
 
   t[1] = tspan[1]
@@ -40,7 +40,7 @@ function lsoda_0(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userd
   #
 
   ctx = lsoda_context_t()
-    ctx.function_ = cfunction(lsodafun,Cint,(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData}))
+    ctx.function_ = cfunction(lsodafun,Cint,Tuple{(Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{UserFunctionAndData})...})
     ctx.neq = neq
     ctx.state = 1
     ctx.data = pointer_from_objref(userfun)
@@ -80,9 +80,9 @@ function lsoda(f::Function, y0::Vector{Float64}, tspan::Vector{Float64}; userdat
     rtol = copy(reltol)
   end
 
-  t    = Array{Float64}(1)
-  tout = Array{Float64}(1)
-  y    = Array{Float64}(neq)
+  t    = Array{Float64}(undef,1)
+  tout = Array{Float64}(undef,1)
+  y    = Array{Float64}(undef,neq)
   y    = copy(y0)
 
   t[1]    = tspan[1]
@@ -128,8 +128,8 @@ function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Flo
 # 		# unsafe_pointer_to_objref(ctx.data).data = userdata
 # 	end
 	
-	t    = Array{Float64}(1)
-	tout = Array{Float64}(1)
+	t    = Array{Float64}(undef,1)
+	tout = Array{Float64}(undef,1)
 	t[1] = tspan[1]
 	tout[1] = tspan[2]
 	lsoda(ctx,y,t,tout[1])
