@@ -1,10 +1,13 @@
 using LSODA, DiffEqProblemLibrary, Test
+using DiffEqProblemLibrary.ODEProblemLibrary: importodeproblems; importodeproblems()
+import DiffEqProblemLibrary.ODEProblemLibrary: prob_ode_linear, prob_ode_2Dlinear
+
 prob = prob_ode_linear
 sol = solve(prob,lsoda(),saveat=[1/2])
-@test sol.t == [0,1/2,1]
+@test sol.t == [1/2,1]
 prob = prob_ode_2Dlinear
 sol = solve(prob,lsoda(),saveat=[1/2])
-@test sol.t == [0,1/2,1]
+@test sol.t == [1/2,1]
 sol = solve(prob,lsoda(),saveat=1/10)
 @test sol.t == collect(0:1/10:1)
 

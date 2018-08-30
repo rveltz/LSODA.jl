@@ -1,5 +1,5 @@
 using LSODA
-using Base.Test
+using Test
 
 # write your own tests here
 println("--> test1 =============")

@@ -1,13 +1,13 @@
 using Parameters, Compat
 
-@with_kw type lsoda_common_t 
+@with_kw mutable struct lsoda_common_t
     yh::Ptr{Ptr{Cdouble}}= C_NULL
     wm::Ptr{Ptr{Cdouble}}= C_NULL
     ewt::Ptr{Cdouble}= C_NULL
     savf::Ptr{Cdouble}= C_NULL
     acor::Ptr{Cdouble}= C_NULL
     ipvt::Ptr{Cint}= C_NULL
-    memory::Ptr{Void}= C_NULL
+    memory::Ptr{Nothing}= C_NULL
     h::Cdouble = 0.
     hu::Cdouble = 0.
     rc::Cdouble = 0.
@@ -43,7 +43,7 @@ using Parameters, Compat
     miter::Cint = 0
 end
 
-@with_kw type lsoda_opt_t 
+@with_kw mutable struct lsoda_opt_t
 	  ixpr::Cint = 0
     mxstep::Cint = 0
     mxhnil::Cint = 0
@@ -59,23 +59,21 @@ end
     atol::Ptr{Cdouble} = C_NULL
 end
 
-# typealias _lsoda_f Ptr{Void} #: it was for v0.5
-const _lsoda_f = Ptr{Void}
+const _lsoda_f = Ptr{Nothing}
 
-
-@with_kw type lsoda_context_t 
+@with_kw mutable struct lsoda_context_t
     function_::_lsoda_f = C_NULL
-    data::Ptr{Void} = C_NULL ##
+    data::Ptr{Nothing} = C_NULL ##
     neq::Cint = 0
     state::Cint = 0
     error::Cstring = C_NULL
     common::Ptr{lsoda_common_t} = C_NULL
     opt::Ptr{lsoda_opt_t} = C_NULL
 end
-# typealias lsoda_context_t_ptr Ptr{lsoda_context_t}# it was for v0.5
+
 const lsoda_context_t_ptr = Ptr{lsoda_context_t}
 
-type UserFunctionAndData
+mutable struct UserFunctionAndData
     func::Function
     data::Any
     neq::Cint
@@ -83,8 +81,8 @@ type UserFunctionAndData
 end
 
 # UserFunctionAndData(func::Function) = func
-# UserFunctionAndData(func::Function, data::Void) = func
-# UserFunctionAndData(func::Function, data::Void, neq::Cint) = func
+# UserFunctionAndData(func::Function, data::Nothing) = func
+# UserFunctionAndData(func::Function, data::Nothing, neq::Cint) = func
 
 function lsoda_prepare(ctx::lsoda_context_t,opt::lsoda_opt_t)
   return ccall((:lsoda_prepare,liblsoda),Cint,
@@ -100,17 +98,17 @@ end
 
 
 function lsoda_reset(ctx::lsoda_context_t)
-	ccall((:lsoda_reset,liblsoda),Void,(Ptr{lsoda_context_t},),Ref(ctx))
+	ccall((:lsoda_reset,liblsoda),Nothing,(Ptr{lsoda_context_t},),Ref(ctx))
 end
 
 # written to wrap lsoda_free from C library but never used in practise as
 # lsoda_context_t variables are handled on Julia's side
 function lsoda_free(ctx::lsoda_context_t)
-		ccall((:lsoda_free,liblsoda),Void,(Ref{lsoda_context_t},),Ref(ctx))
+		ccall((:lsoda_free,liblsoda),Nothing,(Ref{lsoda_context_t},),Ref(ctx))
     nothing
 end
 
 function lsoda_free(ctx::Ref{lsoda_context_t})
-		ccall((:lsoda_free,liblsoda),Void,(Ref{lsoda_context_t},),(ctx))
+		ccall((:lsoda_free,liblsoda),Nothing,(Ref{lsoda_context_t},),(ctx))
     nothing
 end
