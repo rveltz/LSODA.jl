@@ -13,7 +13,7 @@
 
 ## Installation
 
-To install this package, run the command `Pkg.add("LSODA")`.
+To install this package, run the command `add LSODA`.
 ## Simplified Functions
 
 To solve an ODE, one can call the simplified solver:
