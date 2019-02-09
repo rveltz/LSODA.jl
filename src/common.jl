@@ -31,6 +31,7 @@ function solve(
     save_everystep=isempty(saveat),
     save_start = save_everystep || isempty(saveat) || typeof(saveat) <: Number ? true : prob.tspan[1] in saveat,
     userdata=nothing,
+    alias_u0=false,
     kwargs...) where {uType,tupType,isinplace}
 
     tType = eltype(tupType)
@@ -96,7 +97,11 @@ function solve(
     if typeof(prob.u0) <: Number
         u0 = [prob.u0]
     else
-        u0 = vec(deepcopy(prob.u0))
+        if alias_u0
+            u0 = vec(prob.u0)
+        else
+            u0 = vec(deepcopy(prob.u0))
+        end
     end
 
     sizeu = size(prob.u0)
