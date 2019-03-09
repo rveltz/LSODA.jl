@@ -222,7 +222,7 @@ function solve(
         end
     end
 
-    destats = DEStats()
+    destats = DiffEqBase.DEStats()
     destats.nf = ch.nfe
     destats.njacs = ch.nje
 
