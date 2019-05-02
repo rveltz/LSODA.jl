@@ -222,9 +222,13 @@ function solve(
         end
     end
 
+    destats = DiffEqBase.DEStats()
+    destats.nf = ch.nfe
+    destats.njacs = ch.nje
+
     lsoda_free(ch)
 
     DiffEqBase.build_solution(prob, alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,
-                   retcode = :Success)
+                   retcode = :Success, destats = destats)
 end
