@@ -9,3 +9,4 @@ deps/src/
 deps/usr/
 deps/downloads/
 deps/deps.jl
+*.log
