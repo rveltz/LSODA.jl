@@ -16,12 +16,10 @@ mutable struct CommonFunction{F,P}
 end
 
 function commonfun(t::T1,y::T2,yp::T3,comfun::CommonFunction) where {T1,T2,T3}
-  GC.@preserve y yp begin
   y_ = unsafe_wrap(Array,y,comfun.neq)
   ydot_ = unsafe_wrap(Array,yp,comfun.neq)
-  GC.@preserve ydot_ y comfun.func(ydot_,y_,comfun.p,t)
+  comfun.func(ydot_,y_,comfun.p,t)
   return Int32(0)
-  end
 end
 
 function solve(
@@ -164,7 +162,7 @@ function solve(
 
     fex_c = old_cfunction(commonfun,Cint,Tuple{Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{typeof(comfun)}})
 
-    GC.@preserve fex_c comfun f! begin
+    GC.@preserve comfun begin
     ctx = lsoda_context_t()
     ctx.function_ = fex_c
     ctx.neq = neq
