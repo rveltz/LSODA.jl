@@ -2,6 +2,11 @@
   ccall(:jl_function_ptr, Ptr{Cvoid}, (Any, Any, Any), f, r, a)
 end
 
+function my_pointer_to_objref(a)
+    b = Ref{Any}(a)
+    Base.pointerref(Ptr{Ptr{Cvoid}}(pointer_from_objref(b)), 1, Core.sizeof(Ptr{Cvoid}))
+end
+
 ## Common Interface Solve Functions
 
 mutable struct CommonFunction{F,P}
@@ -164,7 +169,7 @@ function solve(
     ctx.function_ = fex_c
     ctx.neq = neq
     ctx.state = 1
-    ctx.data = pointer_from_objref(comfun)
+    ctx.data = my_pointer_to_objref(comfun)
     ch = ContextHandle(ctx)
 
     lsoda_prepare(ctx,opt)
