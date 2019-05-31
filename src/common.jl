@@ -2,11 +2,6 @@
   ccall(:jl_function_ptr, Ptr{Cvoid}, (Any, Any, Any), f, r, a)
 end
 
-function my_pointer_to_objref(a)
-    b = Ref{Any}(a)
-    Base.pointerref(Ptr{Ptr{Cvoid}}(pointer_from_objref(b)), 1, Core.sizeof(Ptr{Cvoid}))
-end
-
 ## Common Interface Solve Functions
 
 mutable struct CommonFunction{F,P}
@@ -133,6 +128,9 @@ function solve(
 
     neq = Int32(length(u0))
     comfun = CommonFunction(f!,prob.p,neq)
+    GC.@preserve comfun begin
+
+    global ___ref = comfun
 
     atol = ones(Float64,neq)
     rtol = ones(Float64,neq)
@@ -162,12 +160,12 @@ function solve(
 
     fex_c = old_cfunction(commonfun,Cint,Tuple{Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{typeof(comfun)}})
 
-    GC.@preserve comfun begin
     ctx = lsoda_context_t()
     ctx.function_ = fex_c
     ctx.neq = neq
     ctx.state = 1
-    ctx.data = my_pointer_to_objref(comfun)
+    ctx.data = pointer_from_objref(comfun)
+
     ch = ContextHandle(ctx)
 
     lsoda_prepare(ctx,opt)
@@ -229,9 +227,11 @@ function solve(
     end
 
     lsoda_free(ch)
+    global ___ref = nothing
+    end
+
 
     DiffEqBase.build_solution(prob, alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,
                    retcode = :Success)
-    end
 end
