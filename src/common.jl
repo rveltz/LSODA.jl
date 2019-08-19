@@ -128,7 +128,6 @@ function solve(
 
     neq = Int32(length(u0))
     comfun = CommonFunction(f!,prob.p,neq)
-
     atol = ones(Float64,neq)
     rtol = ones(Float64,neq)
 
@@ -144,6 +143,10 @@ function solve(
         rtol = copy(reltol)
     end
 
+    GC.@preserve comfun atol rtol begin
+
+    global ___ref = comfun
+
     opt = lsoda_opt_t(mxstep = maxiter)
     opt.ixpr = 0
     opt.rtol = pointer(rtol)
@@ -155,13 +158,18 @@ function solve(
     end
     opt.itask = itask_tmp
 
-    fex_c = old_cfunction(commonfun,Cint,Tuple{Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{typeof(comfun)}})
+    function get_cfunction(comfun::T) where T
+        @cfunction commonfun Cint (Cdouble, Ptr{Cdouble}, Ptr{Cdouble}, Ref{T})
+    end
+
+    fex_c = get_cfunction(comfun)
 
     ctx = lsoda_context_t()
     ctx.function_ = fex_c
     ctx.neq = neq
     ctx.state = 1
     ctx.data = pointer_from_objref(comfun)
+
     ch = ContextHandle(ctx)
 
     lsoda_prepare(ctx,opt)
@@ -223,6 +231,9 @@ function solve(
     end
 
     lsoda_free(ch)
+    global ___ref = nothing
+    end
+
 
     DiffEqBase.build_solution(prob, alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,
