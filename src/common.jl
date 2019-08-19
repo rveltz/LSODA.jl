@@ -178,8 +178,6 @@ function solve(
         ttmp[1] = save_ts[k]
         if t[1] < ttmp[1]
             while t[1] < ttmp[1]
-                #Core.println(t)
-                ctx.error != C_NULL && Core.println(unsafe_string(ctx.error))
                 lsoda(ctx, utmp, t, ttmp[1])
                 if t[1] > ttmp[1] # overstepd, interpolate back
                     t2[1] = t[1] # save step values
