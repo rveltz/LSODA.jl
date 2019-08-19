@@ -158,7 +158,11 @@ function solve(
     end
     opt.itask = itask_tmp
 
-    fex_c = old_cfunction(commonfun,Cint,Tuple{Cdouble,Ptr{Cdouble},Ptr{Cdouble},Ref{typeof(comfun)}})
+    function get_cfunction(comfun::T) where T
+        @cfunction commonfun Cint (Cdouble, Ptr{Cdouble}, Ptr{Cdouble}, Ref{T})
+    end
+
+    fex_c = get_cfunction(comfun)
 
     ctx = lsoda_context_t()
     ctx.function_ = fex_c
@@ -174,6 +178,7 @@ function solve(
         ttmp[1] = save_ts[k]
         if t[1] < ttmp[1]
             while t[1] < ttmp[1]
+                #Core.println(t)
                 lsoda(ctx, utmp, t, ttmp[1])
                 if t[1] > ttmp[1] # overstepd, interpolate back
                     t2[1] = t[1] # save step values
