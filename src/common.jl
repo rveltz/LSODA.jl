@@ -128,10 +128,6 @@ function solve(
 
     neq = Int32(length(u0))
     comfun = CommonFunction(f!,prob.p,neq)
-    GC.@preserve comfun begin
-
-    global ___ref = comfun
-
     atol = ones(Float64,neq)
     rtol = ones(Float64,neq)
 
@@ -146,6 +142,10 @@ function solve(
     else
         rtol = copy(reltol)
     end
+
+    GC.@preserve comfun atol rtol begin
+
+    global ___ref = comfun
 
     opt = lsoda_opt_t(mxstep = maxiter)
     opt.ixpr = 0
