@@ -55,8 +55,8 @@ function solve(
         error("This solver is not able to use mass matrices.")
     end
 
-    if callback != nothing || prob.callback != nothing
-        error("LSODA is not compatible with callbacks.")
+    if callback != nothing || :callback in keys(prob.kwargs)
+      error("LSODA is not compatible with callbacks.")
     end
 
     tspan = prob.tspan
