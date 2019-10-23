@@ -13,7 +13,8 @@
 
 ## Installation
 
-To install this package, run the command `add LSODA`.
+To install this package, run the command: 
+`sudo apt-get install build-essential && julia -e 'using Pkg; Pkg.add("LSODA")'`.
 ## Simplified Functions
 
 To solve an ODE, one can call the simplified solver:
