@@ -61,10 +61,10 @@ The functionality of LSODA.jl can be accessed through the JuliaDiffEq common int
 
 ```julia
 using LSODA, DiffEqBase
-function rhs!(t, x, ydot, data)
-    ydot[1]=1.0E4 * x[2] * x[3] - .04E0 * x[1]
-    ydot[3]=3.0E7 * x[2] * x[2]
-    ydot[2]=-ydot[1] - ydot[3]
+function rhs!(du, u, p, t)
+    du[1]=1.0E4 * u[2] * u[3] - .04E0 * u[1]
+    du[3]=3.0E7 * u[2] * u[2]
+    du[2]=-du[1] - du[3]
   nothing
 end
 
