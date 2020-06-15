@@ -80,3 +80,34 @@ sol = solve(prob,lsoda())
 ```
 
 Many keyword arguments can be used to control the solver, its tolerances, and its output formats. For more information, please see the [DifferentialEquations.jl documentation](https://juliadiffeq.github.io/DiffEqDocs.jl/latest/).
+
+## Citing
+
+If using the algorithm through the DifferentialEquations.jl common interface,
+please cite:
+
+```
+@article{rackauckas2017differentialequations,
+  title={Differentialequations. jl--a performant and feature-rich ecosystem for solving differential equations in julia},
+  author={Rackauckas, Christopher and Nie, Qing},
+  journal={Journal of Open Research Software},
+  volume={5},
+  number={1},
+  year={2017},
+  publisher={Ubiquity Press}
+}
+```
+
+For the original algorithm, please cite:
+
+- Alan Hindmarsh, ODEPACK, a Systematized Collection of ODE Solvers,
+  in Scientific Computing, edited by Robert Stepleman, Elsevier, 1983,
+  ISBN13: 978-0444866073, LC: Q172.S35.
+
+- K Radhakrishnan, Alan Hindmarsh, Description and Use of LSODE, the Livermore
+  Solver for Ordinary Differential Equations, Technical report UCRL-ID-113855,
+  Lawrence Livermore National Laboratory, December 1993.
+
+- Linda Petzold, Automatic Selection of Methods for Solving Stiff and Nonstiff
+  Systems of  Ordinary Differential Equations, SIAM J. Sci. and Stat. Comput.,
+  4(1), 136–148.
