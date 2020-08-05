@@ -17,7 +17,7 @@ function commonfun(t::T1,y::T2,yp::T3,comfun::CommonFunction) where {T1,T2,T3}
   return Int32(0)
 end
 
-function solve(
+function DiffEqBase.__solve(
     prob::DiffEqBase.AbstractODEProblem{uType,tupType,isinplace},
     alg::LSODAAlgorithm,
     timeseries=[],ts=[],ks=[];
