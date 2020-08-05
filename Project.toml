@@ -13,6 +13,7 @@ Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [compat]
+BinDeps = "1.0"
 DiffEqBase = "6"
 julia = "1"
 
