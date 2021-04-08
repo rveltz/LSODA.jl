@@ -115,7 +115,7 @@ Solves a set of ordinary differential equations using the LSODA algorithm and th
 """
 function lsoda_evolve!(ctx::lsoda_context_t,y::Vector{Float64},tspan::Vector{Float64})
 	@assert ctx.neq == length(y)
-# if userdata != nothing
+# if userdata !== nothing
 # 		# this functionality is not working yet
 # 		# ctx.data.data = userdata
 # 		# unsafe_pointer_to_objref(ctx.data).data = userdata
