@@ -5,6 +5,7 @@ module LSODA
 using Compat, DiffEqBase
 import DiffEqBase: solve
 using LinearAlgebra, Printf
+using LSODA_jll
 
 const warnkeywords =
     (:save_idxs, :d_discontinuities, :isoutofdomain, :unstable_check,
@@ -19,14 +20,6 @@ end
 abstract type LSODAAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 abstract type LSODAAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 struct lsoda <: LSODAAlgorithm end
-
-
-const depsfile = joinpath(dirname(dirname(@__FILE__)),"deps","deps.jl")
-if isfile(depsfile)
-    include(depsfile)
-else
-    error("LSODA is not properly installed. Please run Pkg.build(\"LSODA\")")
-end
 
 export lsoda, lsoda_0, lsoda_opt_t, lsoda_context_t, lsoda_prepare, lsoda_reset, lsoda_opt_t, lsoda_free, lsoda_evolve!, UserFunctionAndData
 
