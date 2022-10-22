@@ -1,7 +1,7 @@
 name = "LSODA"
 uuid = "7f56f5a3-f504-529b-bc02-0b1fe5e64312"
 authors = ["Romain Veltz and Chris Rackauckas"]
-version = "0.7.0"
+version = "0.7.1"
 
 [deps]
 BinDeps = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
@@ -15,14 +15,14 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [compat]
 BinDeps = "1.0"
-Compat = "3.13"
+Compat = "4"
 DiffEqBase = "6"
 Parameters = "0.12"
 julia = "1"
 
 [extras]
-DiffEqProblemLibrary = "a077e3f3-b75c-5d7f-a0c6-6bc4c8ec64a9"
+ODEProblemLibrary = "fdc4e326-1af4-4b90-96e7-779fcce2daa5"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "DiffEqProblemLibrary"]
+test = ["Test", "ODEProblemLibrary"]
