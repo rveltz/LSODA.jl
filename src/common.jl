@@ -237,5 +237,5 @@ function DiffEqBase.__solve(
 
     DiffEqBase.build_solution(prob, alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,
-                   retcode = :Success)
+                   retcode = ReturnCode.Success)
 end
