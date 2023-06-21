@@ -18,7 +18,6 @@ function __init__()
 end
 
 abstract type LSODAAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
-abstract type LSODAAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 struct lsoda <: LSODAAlgorithm end
 
 export lsoda, lsoda_0, lsoda_opt_t, lsoda_context_t, lsoda_prepare, lsoda_reset, lsoda_opt_t, lsoda_free, lsoda_evolve!, UserFunctionAndData
