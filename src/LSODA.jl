@@ -19,6 +19,7 @@ end
 
 abstract type LSODAAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 struct lsoda <: LSODAAlgorithm end
+SciMLBase.alg_order(alg::lsoda) = 12
 
 export lsoda, lsoda_0, lsoda_opt_t, lsoda_context_t, lsoda_prepare, lsoda_reset, lsoda_opt_t, lsoda_free, lsoda_evolve!, UserFunctionAndData
 
