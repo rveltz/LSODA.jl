@@ -25,6 +25,7 @@ function DiffEqBase.__solve(
     verbose=true,
     abstol=1/10^6,reltol=1/10^3,
     tstops=Float64[],
+    d_discontinuities=Float64[],
     saveat=Float64[], maxiter=Int(1e5),
     callback=nothing,
     timeseries_errors=true,
@@ -90,16 +91,12 @@ function DiffEqBase.__solve(
         error("First saving timepoint is before the solving timespan")
     end
 
-    tstops_vec = convert(Vector{tType}, sort(unique(collect(tstops))))
+    tstops_vec = convert(Vector{tType}, sort(unique([collect(tstops); collect(d_discontinuities)])))
     filter!(t -> t0 < t < T, tstops_vec)
-    has_tstops = !isempty(tstops_vec)
+    # Always treat T as a tstop — the solver should never step past the end
+    push!(tstops_vec, T)
 
-    # Merge tstops into target integration times
-    if has_tstops
-        all_targets = sort(unique([save_ts; tstops_vec]))
-    else
-        all_targets = save_ts
-    end
+    all_targets = sort(unique([save_ts; tstops_vec]))
     save_set = Set(save_ts)
     tstops_set = Set(tstops_vec)
 
@@ -160,11 +157,7 @@ function DiffEqBase.__solve(
     opt.ixpr = 0
     opt.rtol = pointer(rtol)
     opt.atol = pointer(atol)
-    if has_tstops
-        itask_tmp = save_everystep ? 5 : 4
-    else
-        itask_tmp = save_everystep ? 2 : 1
-    end
+    itask_tmp = save_everystep ? 5 : 4
     opt.itask = itask_tmp
 
     function get_cfunction(comfun::T) where T
@@ -188,24 +181,15 @@ function DiffEqBase.__solve(
     for k in 2:length(all_targets)
         ttmp[1] = all_targets[k]
         is_save_point = all_targets[k] in save_set
+        is_tstop = all_targets[k] in tstops_set
 
         # Update tcrit to next tstop ahead of current time
-        if has_tstops
-            while tstop_idx <= length(tstops_vec) && tstops_vec[tstop_idx] <= t[1]
-                tstop_idx += 1
-            end
-            if tstop_idx <= length(tstops_vec)
-                opt.tcrit = tstops_vec[tstop_idx]
-            else
-                # No more tstops ahead, switch to non-tcrit mode
-                opt.itask = save_everystep ? 2 : 1
-                itask_tmp = opt.itask
-            end
+        while tstop_idx <= length(tstops_vec) && tstops_vec[tstop_idx] <= t[1]
+            tstop_idx += 1
         end
-
-        # When tcrit is set to this target (it's a tstop), the solver
-        # cannot overstep it, so use a simpler non-overstep path.
-        is_tstop = has_tstops && all_targets[k] in tstops_set
+        if tstop_idx <= length(tstops_vec)
+            opt.tcrit = tstops_vec[tstop_idx]
+        end
 
         if t[1] < ttmp[1]
             if is_tstop
@@ -218,20 +202,22 @@ function DiffEqBase.__solve(
                     end
                 end
             else
+                # saveat-only target between tstops: solver may overstep
+                # (tcrit is at the next tstop, not at this saveat point).
+                # Since T is always a tstop, this is never the last target.
                 while t[1] < ttmp[1]
                     lsoda(ctx, utmp, t, ttmp[1])
                     if t[1] > ttmp[1] # overstepped, interpolate back
-                        t2[1] = t[1] # save step values
-                        copyto!(utmp2,utmp) # save step values
-                        opt.itask = 1 # change to interpolating
+                        t2[1] = t[1]
+                        copyto!(utmp2,utmp)
+                        opt.itask = 1 # interpolation mode
                         lsoda(ctx, utmp, t, ttmp[1])
                         opt.itask = itask_tmp
                         if save_everystep || is_save_point
                             push!(ures, copy(utmp))
                             push!(ts, t[1])
                         end
-                        # don't overstep the last timestep
-                        if k != length(all_targets) && all_targets[k+1] > t2[1]
+                        if all_targets[k+1] > t2[1]
                             push!(ures, copy(utmp2))
                             push!(ts, t2[1])
                         end
@@ -246,20 +232,31 @@ function DiffEqBase.__solve(
                 end
             end
       else
-            if save_everystep || is_save_point
-                t2[1] = t[1] # save step values
-                copyto!(utmp2, utmp) # save step values
-                opt.itask = 1 # change to interpolating
-                lsoda(ctx, utmp, t, ttmp[1])
-                opt.itask = itask_tmp
-                push!(ures, copy(utmp))
-                push!(ts, t[1])
-                if k != length(all_targets) && all_targets[k+1] > t2[1] # don't overstep the last timestep
-                    push!(ures,copy(utmp2))
-                    push!(ts,t2[1])
+            if is_tstop
+                # Already at this tstop (solver landed here during a prior target).
+                # No interpolation needed — just save.
+                if save_everystep || is_save_point
+                    push!(ures, copy(utmp))
+                    push!(ts, t[1])
                 end
-                copyto!(utmp,utmp2)
-                t[1] = t2[1]
+            else
+                # Already past a saveat-only target, interpolate back.
+                # Since T is always a tstop, this is never the last target.
+                if save_everystep || is_save_point
+                    t2[1] = t[1]
+                    copyto!(utmp2, utmp)
+                    opt.itask = 1 # interpolation mode
+                    lsoda(ctx, utmp, t, ttmp[1])
+                    opt.itask = itask_tmp
+                    push!(ures, copy(utmp))
+                    push!(ts, t[1])
+                    if all_targets[k+1] > t2[1]
+                        push!(ures,copy(utmp2))
+                        push!(ts,t2[1])
+                    end
+                    copyto!(utmp,utmp2)
+                    t[1] = t2[1]
+                end
             end
         end
     end

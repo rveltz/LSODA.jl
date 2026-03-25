@@ -8,7 +8,7 @@ using LinearAlgebra, Printf
 using LSODA_jll
 
 const warnkeywords =
-    (:save_idxs, :d_discontinuities, :isoutofdomain, :unstable_check,
+    (:save_idxs, :isoutofdomain, :unstable_check,
      :calck, :progress, :timeseries_steps, :dense,
      :dtmin, :dtmax,
      :internalnorm, :gamma, :beta1, :beta2, :qmax, :qmin, :qoldinit)
