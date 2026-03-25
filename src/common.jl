@@ -27,6 +27,7 @@ function DiffEqBase.__solve(
     tstops=Float64[],
     d_discontinuities=Float64[],
     saveat=Float64[], maxiter=Int(1e5),
+    dtmin=0.0, dtmax=0.0,
     callback=nothing,
     timeseries_errors=true,
     save_everystep=isempty(saveat),
@@ -157,6 +158,8 @@ function DiffEqBase.__solve(
     opt.ixpr = 0
     opt.rtol = pointer(rtol)
     opt.atol = pointer(atol)
+    opt.hmin = Float64(dtmin)
+    opt.hmax = Float64(dtmax)
     itask_tmp = save_everystep ? 5 : 4
     opt.itask = itask_tmp
 
