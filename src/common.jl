@@ -90,9 +90,17 @@ function DiffEqBase.__solve(
         error("First saving timepoint is before the solving timespan")
     end
 
-    if !isempty(tstops)
-        error("tstops is not supported for this solver. Please use saveat instead")
+    tstops_vec = convert(Vector{tType}, sort(unique(collect(tstops))))
+    filter!(t -> t0 < t < T, tstops_vec)
+    has_tstops = !isempty(tstops_vec)
+
+    # Merge tstops into target integration times
+    if has_tstops
+        all_targets = sort(unique([save_ts; tstops_vec]))
+    else
+        all_targets = save_ts
     end
+    save_set = Set(save_ts)
 
     if typeof(prob.u0) <: Number
         u0 = [prob.u0]
@@ -151,10 +159,10 @@ function DiffEqBase.__solve(
     opt.ixpr = 0
     opt.rtol = pointer(rtol)
     opt.atol = pointer(atol)
-    if save_everystep
-        itask_tmp = 2
+    if has_tstops
+        itask_tmp = save_everystep ? 5 : 4
     else
-        itask_tmp = 1
+        itask_tmp = save_everystep ? 2 : 1
     end
     opt.itask = itask_tmp
 
@@ -174,45 +182,69 @@ function DiffEqBase.__solve(
 
     lsoda_prepare(ctx,opt)
 
-    for k in 2:length(save_ts)
-        ttmp[1] = save_ts[k]
+    tstop_idx = 1
+
+    for k in 2:length(all_targets)
+        ttmp[1] = all_targets[k]
+        is_save_point = all_targets[k] in save_set
+
+        # Update tcrit to next tstop ahead of current time
+        if has_tstops
+            while tstop_idx <= length(tstops_vec) && tstops_vec[tstop_idx] <= t[1]
+                tstop_idx += 1
+            end
+            if tstop_idx <= length(tstops_vec)
+                opt.tcrit = tstops_vec[tstop_idx]
+            else
+                # No more tstops ahead, switch to non-tcrit mode
+                opt.itask = save_everystep ? 2 : 1
+                itask_tmp = opt.itask
+            end
+        end
+
         if t[1] < ttmp[1]
             while t[1] < ttmp[1]
                 lsoda(ctx, utmp, t, ttmp[1])
-                if t[1] > ttmp[1] # overstepd, interpolate back
+                if t[1] > ttmp[1] # overstepped, interpolate back
                     t2[1] = t[1] # save step values
                     copyto!(utmp2,utmp) # save step values
                     opt.itask = 1 # change to interpolating
                     lsoda(ctx, utmp, t, ttmp[1])
                     opt.itask = itask_tmp
-                    push!(ures, copy(utmp))
-                    push!(ts, t[1])
+                    if save_everystep || is_save_point
+                        push!(ures, copy(utmp))
+                        push!(ts, t[1])
+                    end
                     # don't overstep the last timestep
-                    if k != length(save_ts) && save_ts[k+1] > t2[1]
+                    if k != length(all_targets) && all_targets[k+1] > t2[1]
                         push!(ures, copy(utmp2))
                         push!(ts, t2[1])
                     end
                     copyto!(utmp, utmp2)
                     t[1] = t2[1]
                 else
-                    push!(ures, copy(utmp))
-                    push!(ts,t[1])
+                    if save_everystep || is_save_point
+                        push!(ures, copy(utmp))
+                        push!(ts,t[1])
+                    end
                 end
             end
       else
-            t2[1] = t[1] # save step values
-            copyto!(utmp2, utmp) # save step values
-            opt.itask = 1 # change to interpolating
-            lsoda(ctx, utmp, t, ttmp[1])
-            opt.itask = itask_tmp
-            push!(ures, copy(utmp))
-            push!(ts, t[1])
-            if k != length(save_ts) && save_ts[k+1] > t2[1] # don't overstep the last timestep
-                push!(ures,copy(utmp2))
-                push!(ts,t2[1])
+            if save_everystep || is_save_point
+                t2[1] = t[1] # save step values
+                copyto!(utmp2, utmp) # save step values
+                opt.itask = 1 # change to interpolating
+                lsoda(ctx, utmp, t, ttmp[1])
+                opt.itask = itask_tmp
+                push!(ures, copy(utmp))
+                push!(ts, t[1])
+                if k != length(all_targets) && all_targets[k+1] > t2[1] # don't overstep the last timestep
+                    push!(ures,copy(utmp2))
+                    push!(ts,t2[1])
+                end
+                copyto!(utmp,utmp2)
+                t[1] = t2[1]
             end
-            copyto!(utmp,utmp2)
-            t[1] = t2[1]
         end
     end
 
