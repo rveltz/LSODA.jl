@@ -17,12 +17,19 @@ function commonfun(t::T1,y::T2,yp::T3,comfun::CommonFunction) where {T1,T2,T3}
   return Int32(0)
 end
 
+# Normalize the `verbose` keyword to a `DEVerbosity` (the SciMLLogging-based
+# verbosity specifier from DiffEqBase). Accepts a verbosity preset (e.g.
+# `Standard()`), a `DEVerbosity` directly, or a `Bool` for backwards compatibility.
+_process_verbose_param(v::SciMLLogging.AbstractVerbosityPreset) = DEVerbosity(v)
+_process_verbose_param(v::Bool) = v ? DEVerbosity() : DEVerbosity(SciMLLogging.None())
+_process_verbose_param(v::DEVerbosity) = v
+
 function DiffEqBase.__solve(
     prob::DiffEqBase.AbstractODEProblem{uType,tupType,isinplace},
     alg::LSODAAlgorithm,
     timeseries=[],ts=[],ks=[];
 
-    verbose=true,
+    verbose = Standard(),
     abstol=1/10^6,reltol=1/10^3,
     tstops=Float64[],
     d_discontinuities=Float64[],
@@ -38,20 +45,22 @@ function DiffEqBase.__solve(
 
     tType = eltype(tupType)
 
-    if verbose
-        warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
-        if !(typeof(prob.f) <: DiffEqBase.AbstractParameterizedFunction)
-            if DiffEqBase.has_tgrad(prob.f)
-                @warn("Explicit t-gradient given to this stiff solver is ignored.")
-                warned = true
-            end
-            if DiffEqBase.has_jac(prob.f)
-                @warn("Explicit Jacobian given to this stiff solver is ignored.")
-                warned = true
-            end
+    verbose = _process_verbose_param(verbose)
+
+    warned = !isempty(kwargs) && check_keywords(alg, kwargs, warnlist)
+    if !(typeof(prob.f) <: DiffEqBase.AbstractParameterizedFunction)
+        if DiffEqBase.has_tgrad(prob.f)
+            @SciMLMessage("Explicit t-gradient given to this stiff solver is ignored.",
+                verbose, :mismatched_input_output_type)
+            warned = true
         end
-        warned && warn_compat()
+        if DiffEqBase.has_jac(prob.f)
+            @SciMLMessage("Explicit Jacobian given to this stiff solver is ignored.",
+                verbose, :mismatched_input_output_type)
+            warned = true
+        end
     end
+    warned && warn_compat()
 
     if prob.f.mass_matrix != I
         error("This solver is not able to use mass matrices.")
