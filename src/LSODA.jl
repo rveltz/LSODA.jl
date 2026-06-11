@@ -3,7 +3,8 @@ __precompile__()
 module LSODA
 
 using Compat, DiffEqBase
-import DiffEqBase: solve
+import DiffEqBase: solve, DEVerbosity
+using SciMLLogging: SciMLLogging, Standard, @SciMLMessage
 using LinearAlgebra, Printf
 using LSODA_jll
 
