@@ -1,5 +1,6 @@
 using LSODA, ODEProblemLibrary, Test
 import ODEProblemLibrary: prob_ode_linear, prob_ode_2Dlinear
+using SciMLBase: ReturnCode
 
 prob = prob_ode_linear
 sol = solve(prob,lsoda(),saveat=[1/2])
@@ -12,6 +13,9 @@ sol = solve(prob,lsoda(),saveat=1/10)
 
 prob = prob_ode_linear
 sol = solve(prob,lsoda())
+sol_maxiters = solve(prob, lsoda(), maxiters = 1, save_everystep = false)
+@test sol_maxiters.retcode == ReturnCode.MaxIters
+@test sol_maxiters.t[end] < prob.tspan[end]
 sol = solve(prob,lsoda(),save_everystep=true,saveat=[1/2])
 @test 1/2 ∈ sol.t
 prob = prob_ode_2Dlinear

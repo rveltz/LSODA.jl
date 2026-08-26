@@ -24,6 +24,13 @@ _process_verbose_param(v::SciMLLogging.AbstractVerbosityPreset) = DEVerbosity(v)
 _process_verbose_param(v::Bool) = v ? DEVerbosity() : DEVerbosity(SciMLLogging.None())
 _process_verbose_param(v::DEVerbosity) = v
 
+function _lsoda_retcode(state)
+    state > 0 && return SciMLBase.ReturnCode.Success
+    state == -1 && return SciMLBase.ReturnCode.MaxIters
+    state in (-4, -5) && return SciMLBase.ReturnCode.ConvergenceFailure
+    return SciMLBase.ReturnCode.Failure
+end
+
 function DiffEqBase.__solve(
     prob::DiffEqBase.AbstractODEProblem{uType,tupType,isinplace},
     alg::LSODAAlgorithm,
@@ -33,7 +40,7 @@ function DiffEqBase.__solve(
     abstol=1/10^6,reltol=1/10^3,
     tstops=Float64[],
     d_discontinuities=Float64[],
-    saveat=Float64[], maxiter=Int(1e5),
+    saveat = Float64[], maxiters = Int(1.0e5),
     dtmin=0.0, dtmax=0.0,
     callback=nothing,
     timeseries_errors=true,
@@ -163,7 +170,7 @@ function DiffEqBase.__solve(
 
     global ___ref = comfun
 
-    opt = lsoda_opt_t(mxstep = maxiter)
+    opt = lsoda_opt_t(mxstep = maxiters)
     opt.ixpr = 0
     opt.rtol = pointer(rtol)
     opt.atol = pointer(atol)
@@ -189,6 +196,7 @@ function DiffEqBase.__solve(
     lsoda_prepare(ctx,opt)
 
     tstop_idx = 1
+    retcode = SciMLBase.ReturnCode.Success
 
     for k in 2:length(all_targets)
         ttmp[1] = all_targets[k]
@@ -208,6 +216,8 @@ function DiffEqBase.__solve(
                 # tcrit == target: solver guaranteed not to overstep
                 while t[1] < ttmp[1]
                     lsoda(ctx, utmp, t, ttmp[1])
+                    retcode = _lsoda_retcode(ctx.state)
+                    retcode == SciMLBase.ReturnCode.Success || break
                     if save_everystep || is_save_point
                         push!(ures, copy(utmp))
                         push!(ts, t[1])
@@ -219,12 +229,16 @@ function DiffEqBase.__solve(
                 # Since T is always a tstop, this is never the last target.
                 while t[1] < ttmp[1]
                     lsoda(ctx, utmp, t, ttmp[1])
+                    retcode = _lsoda_retcode(ctx.state)
+                    retcode == SciMLBase.ReturnCode.Success || break
                     if t[1] > ttmp[1] # overstepped, interpolate back
                         t2[1] = t[1]
                         copyto!(utmp2,utmp)
                         opt.itask = 1 # interpolation mode
                         lsoda(ctx, utmp, t, ttmp[1])
                         opt.itask = itask_tmp
+                        retcode = _lsoda_retcode(ctx.state)
+                        retcode == SciMLBase.ReturnCode.Success || break
                         if save_everystep || is_save_point
                             push!(ures, copy(utmp))
                             push!(ts, t[1])
@@ -260,6 +274,8 @@ function DiffEqBase.__solve(
                     opt.itask = 1 # interpolation mode
                     lsoda(ctx, utmp, t, ttmp[1])
                     opt.itask = itask_tmp
+                    retcode = _lsoda_retcode(ctx.state)
+                    retcode == SciMLBase.ReturnCode.Success || break
                     push!(ures, copy(utmp))
                     push!(ts, t[1])
                     if all_targets[k+1] > t2[1]
@@ -271,6 +287,7 @@ function DiffEqBase.__solve(
                 end
             end
         end
+        retcode == SciMLBase.ReturnCode.Success || break
     end
 
     ### Finishing Routine
@@ -294,5 +311,5 @@ function DiffEqBase.__solve(
 
     DiffEqBase.build_solution(prob, alg, ts, timeseries,
                    timeseries_errors = timeseries_errors,
-                   retcode = ReturnCode.Success)
+                   retcode = retcode)
 end
