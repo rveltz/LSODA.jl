@@ -4,6 +4,7 @@ module LSODA
 
 using Compat, DiffEqBase
 import DiffEqBase: solve, DEVerbosity
+import SciMLBase
 using SciMLLogging: SciMLLogging, Standard, @SciMLMessage
 using LinearAlgebra, Printf
 using LSODA_jll
