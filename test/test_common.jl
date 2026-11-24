@@ -1,6 +1,6 @@
 using LSODA, ODEProblemLibrary, Test
 import ODEProblemLibrary: prob_ode_linear, prob_ode_2Dlinear
-using SciMLBase: ReturnCode
+using SciMLBase: SciMLBase, ReturnCode
 
 prob = prob_ode_linear
 sol = solve(prob,lsoda(),saveat=[1/2])
@@ -86,3 +86,10 @@ exact = [0.0, 0.25, 0.5, 1.0, 1.5]
 for i in 1:length(exact)
     @test isapprox(sol_stop.u[i][1],exact[i],atol=1e-4)
 end
+
+# An empty CallbackSet means no callbacks; a real callback is still refused.
+prob = prob_ode_linear
+sol = solve(prob, lsoda(), callback = SciMLBase.CallbackSet())
+@test sol.retcode == ReturnCode.Success
+cb = SciMLBase.DiscreteCallback((u, t, integrator) -> false, integrator -> nothing)
+@test_throws ErrorException solve(prob, lsoda(), callback = cb)
