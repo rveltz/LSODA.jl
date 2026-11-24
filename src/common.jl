@@ -73,7 +73,7 @@ function DiffEqBase.__solve(
         error("This solver is not able to use mass matrices.")
     end
 
-    if callback != nothing || :callback in keys(prob.kwargs)
+    if _has_callbacks(callback) || _has_callbacks(get(prob.kwargs, :callback, nothing))
       error("LSODA is not compatible with callbacks.")
     end
 
@@ -313,3 +313,8 @@ function DiffEqBase.__solve(
                    timeseries_errors = timeseries_errors,
                    retcode = retcode)
 end
+
+# DiffEqBase passes an empty CallbackSet when the user gave no callback.
+_has_callbacks(::Nothing) = false
+_has_callbacks(cb::SciMLBase.CallbackSet) = !isempty(cb.continuous_callbacks) || !isempty(cb.discrete_callbacks)
+_has_callbacks(cb) = true
